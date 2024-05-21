@@ -45,6 +45,7 @@ class CrimeModel(mesa.Model):
         self.assign_jobs_and_wealth()
         self.generate_households()
         self.cleanup_unfit_individuals()
+        self.setup_siblings()
         self.generate_friends_network()
         self.calculate_crime_multiplier()
         self.calculate_criminal_tendency()
@@ -117,19 +118,20 @@ class CrimeModel(mesa.Model):
         return similarity_score
 
     def generate_friends_network(self):
-        agents = list(self.schedule.agents.shuffle())
+        agents = list(self.schedule.agents)
+        self.random.shuffle(agents) 
         
         # Calculate mean friend count based on age of agents
-        common_friends_number = 3
-        mean_friend_counts = [common_friends_number - (agent.age / 99) * 1.5 for agent in agents]  # Adjust this scaling factor as needed
+        typical_number_of_friends = 3
+        mean_friend_counts = [typical_number_of_friends - (agent.age / 99) * 1.5 for agent in agents]  # Adjust this scaling factor as needed
         # Generate friend counts for each agent using a normal distribution with scaled mean
         friend_counts = [self.random.normal(loc=mean, scale=2) for mean in mean_friend_counts]
-        friend_counts = np.clip(friend_counts, 0, common_friends_number*2).astype(int)  # Ensure friend counts are between 0 and 6
+        friend_counts = np.clip(friend_counts, 0, typical_number_of_friends*2).astype(int)  # Ensure friend counts are between 0 and 6
         sample_size = min(int(self.initial_agents / 3), len(agents) - 1)  # Limit the sample size to 1/3(N) or total agents - 1
         for agent, num_friends in zip(agents, friend_counts):
-            potential_friends = [
-                a for a in agents if a != agent and a not in agent.neighbors['household']
-            ]
+            excluded_neighbors = agent.get_all_relatives()
+
+            potential_friends = [a for a in agents if a != agent and a not in excluded_neighbors]
             if len(potential_friends) > sample_size:
                 potential_friends = self.random.choice(potential_friends, sample_size, replace=False)
             

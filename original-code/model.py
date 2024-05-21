@@ -1013,7 +1013,7 @@ class ProtonOC(Model):
         if self.unemployment_multiplier != "base":
             self.fix_unemployment(self.unemployment_multiplier)
         self.generate_households() #!DONE
-        self.setup_siblings() #! ?
+        self.setup_siblings() #! DONE
         self.assing_parents() # ! ?
         self.setup_employers_jobs()
         for agent in [agent for agent in self.schedule.agents

@@ -115,3 +115,23 @@ class Person(mesa.Agent):
         self.num_co_offenses[asker] = 1
         asker.neighbors.get("criminal").add(self)
         asker.num_co_offenses[self] = 1
+
+    def get_all_relatives(self):
+        # Combine all the specified neighbor sets into a single set to avoid repetition
+        unique_neighbors = set(self.neighbors['household']) | set(self.neighbors['sibling']) | \
+                        set(self.neighbors['offspring']) | set(self.neighbors['parent']) | \
+                        set(self.neighbors['partner'])
+        return unique_neighbors
+    
+    def get_neighbor_list(self, net_name: str):
+        """
+        Given the name of a network, this method returns a list of agents within the network.
+        If the network is empty, it returns an empty list.
+        :param net_name: str, the network name
+        :return: list, return an empty list if the network is empty
+        """
+        agent_net = self.neighbors.get(net_name)
+        if len(agent_net) > 0:
+            return list(agent_net)
+        else:
+            return []
