@@ -2,6 +2,7 @@ import os
 import numpy as np
 import mesa
 import networkx as nx
+from protonoc.simulator.extra import list_contains_problems
 from Person import Person
 from extras import *
 import random
@@ -283,6 +284,47 @@ class CrimeModel(mesa.Model):
                 if len(complex_hh_members) > 1:
                     self.families.append(complex_hh_members)
 
+    def setup_siblings(self) -> None:
+        """
+        Right now, during setup, links between agents are only those within households, between
+        friends and related to the school. At this stage of the standard setup, agents are linked
+        through "siblings" links outside the household. To simulate agents who have left the
+        original household, agents who have children are taken and "sibling" links are created
+        taking care not to create incestuous relationships.
+
+        :return: None
+        """
+        agent_left_household = [p for p in self.schedule.agents if
+                                p.neighbors.get('offspring')]
+        # simulates people who left the original household.
+        for agent in agent_left_household:
+            num_siblings = self.random.poisson(0.5)
+            # 0.5 -> the number of links is N^3 agents, so let's keep this low at this stage links
+            # with other persons are only relatives inside households and friends.
+            candidates = [c for c in agent_left_household
+                          if c not in agent.neighbors.get("household")
+                          and abs(agent.age - c.age) < 5 and c != agent]
+            # remove couples from candidates and their neighborhoods (siblings)
+            if len(candidates) >= 50:
+                candidates = self.random.choice(candidates, 50, replace=False).tolist()
+            while len(candidates) > 0 and list_contains_problems(agent, candidates):
+                # trouble should exist, or check-all-siblings would fail
+                potential_trouble = [x for x in candidates if agent.get_neighbor_list("partner")]
+                trouble = self.random.choice(potential_trouble)
+                candidates.remove(trouble)
+            targets = [agent] + self.random.choice(candidates,
+                                                   min(len(candidates), num_siblings)).tolist()
+            for sib in targets:
+                if sib in agent_left_household:
+                    agent_left_household.remove(sib)
+            for target in targets:
+                target.add_sibling_link(targets)
+                # this is a good place to remind that the number of links in the sibling link
+                # neighbors is not the "number of brothers and sisters"
+                # because, for example, 4 brothers = 6 links.
+            other_targets = targets + [s for c in targets for s in c.neighbors.get('sibling')]
+            for target in other_targets:
+                target.add_sibling_link(other_targets)
 
     def assign_jobs_and_wealth(self) -> None:
         """
