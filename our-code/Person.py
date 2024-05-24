@@ -23,11 +23,14 @@ class Person(mesa.Agent):
         :return: None
         """
         self.oc_member = False
+        self.oc_role = None
+        self.oc_boss = None
+        self.oc_subordinates = None
         self.family_role = None
         self.name = names.get_full_name()
         row = weighted_one_of(self.model.age_gender_dist, lambda x: x[-1],
                                     self.model.random)  # select a row from our age_gender distribution
-        self.birth_tick = 0 - row[0] * self.model.ticks_per_year  # ...and set age... =
+        self.birth_tick = 0 - row[0] * self.model.ticks_per_year
         #self.age = (self.model.tick - self.birth_tick) / self.model.ticks_per_year # to fix?
         self.age = row[0]
         self.gender_is_male = bool(row[1])  # ...and gender according to values in that row.

@@ -13,6 +13,7 @@ class CrimeModel(mesa.Model):
     def __init__(self, N, model_params = {"no-params":"empty"}, agent_params = {"no-params":"empty"}):
         super().__init__()
         self.families = list()
+        self.mafia_heads = set()
         self.ticks_per_year = 12
         self.nat_propensity_m: float = 1.0  # 0.1 -> 10
         self.nat_propensity_sigma: float = 0.25  # 0.1 -> 10.0
@@ -49,7 +50,7 @@ class CrimeModel(mesa.Model):
         self.generate_friends_network()
         self.calculate_crime_multiplier()
         self.calculate_criminal_tendency()
-        self.setup_oc_groups()
+        self.setup_oc_groups2()
         
     def init_data_employed(self):
         self.age_gender_dist = read_csv_data("initial_age_gender_dist").values.tolist()
@@ -405,44 +406,149 @@ class CrimeModel(mesa.Model):
             self.num_oc_families * self.initial_agents / 10000 * self.num_oc_persons / 30)
         scaled_num_oc_persons = np.ceil(
             self.num_oc_persons * self.initial_agents / 10000)
-        print("PRINTS:")
-        print(scaled_num_oc_families)
-        print(scaled_num_oc_persons)
+        members_per_family = int(scaled_num_oc_persons / scaled_num_oc_families)
         # families first.
         # we assume here that we'll never get a negative criminal tendency.
         oc_family_heads = weighted_n_of(scaled_num_oc_families, self.schedule.agents,
                                               lambda x: x.criminal_tendency, self.random)
         candidates = list()
-        print(f"len: {len(oc_family_heads)}")
+        cosca = set()
+        graphs = []
         for head in oc_family_heads:
             head.oc_member = True
-            candidates += [relative for relative in head.neighbors.get('household') if
+            head.oc_role = "boss"
+            self.mafia_heads.add(head)
+            candidates += [relative for relative in head.get_all_relatives() if
                            relative.age >= 18]
-        if len(candidates) >= scaled_num_oc_persons - scaled_num_oc_families:  # family members will be enough
-            members_in_families = weighted_n_of(scaled_num_oc_persons - scaled_num_oc_families,
-                                                      candidates,
-                                                      lambda x: x.criminal_tendency,
-                                                      self.random)
-            # fill up the families as much as possible
-            for member in members_in_families:
-                member.oc_member = True
-        else:  # take more as needed (note that this modifies the count of families)
-            for candidate in candidates:
-                candidate.oc_member = True
-            out_of_family_candidates = [agent for agent in self.schedule.agents
-                                        if not agent.oc_member]
-            out_of_family_candidates = weighted_n_of(
-                scaled_num_oc_persons - len(candidates) - len(oc_family_heads),
-                out_of_family_candidates, lambda x: x.criminal_tendency, self.random)
-            for out_of_family_candidate in out_of_family_candidates:
-                out_of_family_candidate.oc_member = True
+            if len(candidates) >= members_per_family:  # family members will be enough
+                members_in_families = weighted_n_of(members_per_family,
+                                                        candidates,
+                                                        lambda x: x.criminal_tendency,
+                                                        self.random)
+                # fill up the families as much as possible
+                for member in members_in_families:
+                    member.oc_member = True
+                    member.oc_role = "soldier"
+                    cosca.add(member)
+            else:
+                while members_per_family - len(cosca) > 0:
+                    for candidate in candidates:
+                        candidate.oc_member = True
+                        candidate.oc_role = "soldier"
+                        cosca.add(candidate)
+                    break
+                if members_per_family - len(cosca) > 0:
+                    missing_n = members_per_family - len(cosca) 
+                    for el in cosca:
+                        out_of_family_candidates += [agent for agent in el.get_all_relatives()
+                                                        if not agent.oc_member and agent.age >= 18]
+                    out_of_family_candidates = weighted_n_of(
+                        missing_n,
+                        out_of_family_candidates, lambda x: x.criminal_tendency, self.random)
+                    for out_of_family_candidate in out_of_family_candidates:
+                        out_of_family_candidate.oc_member = True
+                        out_of_family_candidate.oc_role = "soldier"
+                        cosca.add(candidate)
+            head.oc_subordinates = cosca
+            cosca_graph = nx.Graph()
+            cosca_graph.add_node(head)
+            for cosca_member in cosca:
+                cosca_graph.add_node(cosca_member)
+                cosca_graph.add_edge(head, cosca_member)
+            graphs.append(cosca_graph)
         # creiamo i nodi del grafo
-        oc_members_pool = []
-        for agent in self.schedule.agents:
-            if agent.oc_member:
-                self.crime_communities_graph.add_node(agent.unique_id)
-                oc_members_pool.append(agent)
-                print(agent.unique_id)
-        for (i, j) in combinations(oc_members_pool, 2):
-            i.add_criminal_link(j)
-            self.crime_communities_graph.add_edge(i.unique_id, j.unique_id)
+        self.crime_communities_graph = nx.compose_all(graphs)
+        for node1, node2 in combinations(self.mafia_heads, 2):
+            self.crime_communities_graph.add_edge(node1, node2)
+    
+    def setup_oc_groups2(self) -> None:
+        """
+        This procedure creates "criminal" type links within the families, based on the criminal
+        tendency of the agents. In case the agents within the families are not enough, new members
+        are taken from outside, ensuring that members of the same household belong to the same mafia family.
+        :return: None
+        """
+        # OC members are scaled down if we don't have 10K agents
+        scaled_num_oc_families = int(np.ceil(
+            self.num_oc_families * self.initial_agents / 10000 * self.num_oc_persons / 30))
+        scaled_num_oc_persons = int(np.ceil(
+            self.num_oc_persons * self.initial_agents / 10000))
+        members_per_family = max(1, int(scaled_num_oc_persons / scaled_num_oc_families))  # Ensure at least 1 member per family
+        print(f"Members per family: {members_per_family}")
+        print(f"Families: {scaled_num_oc_families}")
+        oc_family_heads = weighted_n_of(scaled_num_oc_families, self.schedule.agents,
+                                        lambda x: x.criminal_tendency, self.random)
+        graphs = []
+        for head in oc_family_heads:
+            head.oc_member = True
+            head.oc_role = "boss"
+            self.mafia_heads.add(head)
+            
+            # Collect family members ensuring household constraint
+            candidates = self.collect_candidates(head)
+            
+            # Fill up the family with internal candidates first
+            cosca = self.assign_family_members(head, candidates, members_per_family)
+            
+            # If not enough members, get additional members from outside
+            if len(cosca) < members_per_family:
+                missing_n = members_per_family - len(cosca)
+                broader_family_candidates = self.collect_out_of_family_candidates(head, cosca, missing_n)
+                additional_members = weighted_n_of(missing_n, broader_family_candidates, lambda x: x.criminal_tendency, self.random)
+                cosca.update(self.assign_additional_members(additional_members, cosca, head))
+            head.oc_subordinates = cosca
+            cosca_graph = nx.Graph()
+            cosca_graph.add_node(head)
+            for cosca_member in cosca:
+                cosca_graph.add_node(cosca_member)
+                cosca_graph.add_edge(head, cosca_member)
+            graphs.append(cosca_graph)
+
+        self.crime_communities_graph = nx.compose_all(graphs)
+        for node1, node2 in combinations(self.mafia_heads, 2):
+            self.crime_communities_graph.add_edge(node1, node2)
+
+    def collect_candidates(self, head):
+        candidates = set()
+        for relative in head.get_all_relatives():
+            if relative.age >= 18:
+                candidates.add(relative)
+            candidates.update(m for m in relative.neighbors["household"] if m.age >= 18 and not m.oc_member)
+        return candidates
+
+    def assign_family_members(self, head, candidates, members_per_family):
+        cosca = set()
+        members_in_families = weighted_n_of(min(members_per_family, len(candidates)), candidates, lambda x: x.criminal_tendency, self.random)
+        for member in members_in_families:
+            member.oc_member = True
+            member.oc_role = "soldier"
+            member.oc_boss = head
+            cosca.add(member)
+        return cosca
+
+    def collect_out_of_family_candidates(self, head, cosca, missing_n):
+        out_of_family_candidates = set()
+        for member in cosca:
+            for agent in member.get_all_relatives():
+                if any(a.oc_boss != head for a in agent.neighbors["household"]):
+                    continue
+                if agent.age >= 18 and agent.gender_is_male:
+                    out_of_family_candidates.add(agent)
+                    if len(out_of_family_candidates) >= missing_n:
+                        return out_of_family_candidates
+        return out_of_family_candidates
+
+    def assign_additional_members(self, additional_members, cosca, head):
+        for candidate in additional_members:
+            candidate.oc_member = True
+            candidate.oc_role = "soldier"
+            candidate.oc_boss = head
+            cosca.add(candidate)
+            for household_member in candidate.neighbors["household"]:
+                if household_member.age >= 18:
+                    household_member.oc_member = True
+                    household_member.oc_boss = head
+        return cosca
+
+
+

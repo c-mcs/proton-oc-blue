@@ -114,6 +114,14 @@ def print_report(model, save_to_file=False, age_category_width=15):
 
     # Output report
     report_str = "\n".join(report_lines)
+
+    crime_report = "\n"
+    for head in model.mafia_heads:
+        crime_report += f"Head: {head.unique_id}. Age: {head.age}, Sex: {head.gender_is_male}, Crime P: {head.propensity}\n"
+        for el in [f"Member: {m.unique_id}. Age: {m.age}, Sex: {m.gender_is_male}, Crime P: {m.propensity}\n" for m in head.oc_subordinates]:
+            crime_report += el
+        crime_report += "\n"
+    report_str += crime_report
     if save_to_file:
         current_directory = os.path.dirname(os.path.abspath(__file__))
         report_path = os.path.join(current_directory, "report.txt")
@@ -147,6 +155,8 @@ def show_family_graph(model):
     plt.show()
 
 def show_graphs(model):
+    start_time = time.time()
+
     # Create a figure with 1 row and 3 columns
     fig, axes = plt.subplots(1, 3, figsize=(20, 10))
 
@@ -177,12 +187,12 @@ def show_graphs(model):
     axes[2].set_title('Crime Communities')
     axes[2].set_facecolor('black')
 
+    print("--- %s seconds --- (To show graph)" % (time.time() - start_time))
     plt.show()
 
 if __name__ == "__main__":
     start_time = time.time()
     m = CrimeModel(5000)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- %s seconds --- (To calculate)" % (time.time() - start_time))
     print_report(m, True)
-    print("--- %s seconds ---" % (time.time() - start_time))
     show_graphs(m)
