@@ -171,13 +171,13 @@ def show_graphs(model):
     family_graph = nx.Graph()
     for family in model.families:
         for member in family:
-            family_graph.add_node(member.unique_id, label=member.name)
+            family_graph.add_node(member.unique_id)
             for relative in member.get_all_relatives():
                 family_graph.add_edge(member.unique_id, relative.unique_id)
 
     
     pos_family = nx.spring_layout(family_graph)
-    nx.draw(family_graph, pos_family, ax=axes[1], with_labels=True, node_size=20, font_size=8)
+    nx.draw(family_graph, pos_family, ax=axes[1], node_size=20, font_size=8)
     axes[1].set_title('Family Network')
     axes[1].set_facecolor('black')
 

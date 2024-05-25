@@ -176,116 +176,119 @@ class CrimeModel(mesa.Model):
 
 
     def generate_households(self) -> None:
-            """
-            This procedure aggregates eligible agents into households based on the tables
-            (ProtonOC.self.head_age_dist, ProtonOC.proportion_of_male_singles_by_age,
-            ProtonOC.hh_type_dist, ProtonOC.partner_age_dist, ProtonOC.children_age_dist,
-            ProtonOC.p_single_father) and mostly follows the third algorithm from Gargiulo et al. 2010
-            (https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0008828)
+        """
+        This procedure aggregates eligible agents into households based on the tables
+        (ProtonOC.self.head_age_dist, ProtonOC.proportion_of_male_singles_by_age,
+        ProtonOC.hh_type_dist, ProtonOC.partner_age_dist, ProtonOC.children_age_dist,
+        ProtonOC.p_single_father) and mostly follows the third algorithm from Gargiulo et al. 2010
+        (https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0008828)
 
-            :return: None
-            """
-            population = self.schedule.agents
-            self.hh_size = self.household_sizes(self.initial_agents)
-            complex_hh_sizes = list()
-            max_attempts_by_size = 50
-            attempts_list = list()
+        :return: None
+        """
+        population = self.schedule.agents
+        self.hh_size = self.household_sizes(self.initial_agents)
+        complex_hh_sizes = list()
+        max_attempts_by_size = 50
+        attempts_list = list()
 
-            for size in self.hh_size:
-                success = False
-                nb_attempts = 0
-                while not success and nb_attempts < max_attempts_by_size:
-                    hh_members = list()
-                    nb_attempts += 1
-                    head_age = pick_from_pair_list(self.head_age_dist[size], self.random)
-                    if size == 1:
-                        male_wanted = (self.random.random()
-                                    < self.proportion_of_male_singles_by_age[head_age])
-                        head = pick_from_population_pool_by_age_and_gender(head_age,
-                                                                            male_wanted,
-                                                                            population, self.random)
-                        if head:
-                            success = True
-                            attempts_list.append(nb_attempts)
-                            head.family_role = "head"
-                    else:
-                        hh_type = pick_from_pair_list(self.hh_type_dist[head_age], self.random)
-                        if hh_type == "single_parent":
-                            male_head = self.random.random() \
-                                        < float(self.p_single_father.columns.to_list()[0])
-                        else:
-                            male_head = True
-                        if male_head:
-                            mother_age = pick_from_pair_list(self.partner_age_dist[head_age],
-                                                                self.random)
-                        else:
-                            mother_age = head_age
-                        head = pick_from_population_pool_by_age_and_gender(head_age,\
-                                                                        male_head,
-                                                                        population,self.random)
-                        if head:
-                            hh_members.append(head)
-                            head.family_role = "head"
-                            if hh_type == "couple":
-                                mother = pick_from_population_pool_by_age_and_gender(mother_age,\
-                                                                                    False,
-                                                                                    population,self.random)
-                                if mother:
-                                    hh_members.append(mother)
-                                    mother.family_role = "partner"
-                            num_children = size - len(hh_members)
-                            for child in range(1, int(num_children) + 1):
-                                if num_children in self.children_age_dist:
-                                    if mother_age in self.children_age_dist[num_children]:
-                                        child_age = pick_from_pair_list(
-                                            self.children_age_dist[num_children][mother_age], self.random)
-                                        child = pick_from_population_pool_by_age(child_age,
-                                                                                population,self.random)
-                                        if child:
-                                            hh_members.append(child)
-                                            child.family_role = "child"
-                    hh_members = [memb for memb in hh_members if memb is not None]  # exclude Nones
-                    if len(hh_members) == size:
-                        success = True
-                        attempts_list.append(nb_attempts)
-                        family_wealth_level = hh_members[0].wealth_level
-                        if hh_type == "couple":
-                            hh_members[0].make_partner_link(hh_members[1])
-                            couple = hh_members[0:2]
-                            offsprings = hh_members[2:]
-                            for partner in couple:
-                                partner.make_parent_offsprings_link(offsprings)
-                            for sibling in offsprings:
-                                sibling.add_sibling_link(offsprings)
-                        for member in hh_members:
-                            member.make_household_link(hh_members)
-                            member.wealth_level = family_wealth_level
-                        self.families.append(hh_members)
-                    else:
-                        for member in hh_members:
-                            population.add(member)
-                if not success:
-                    complex_hh_sizes.append(size)
-            print(f"Removing {len(population)} agents.")
-            for m in population:
-                self.schedule.agents.remove(m)
-            return
-            for comp_hh_size in complex_hh_sizes:
-                comp_hh_size = int(min(comp_hh_size, len(population)))
-                complex_hh_members = population[0:comp_hh_size]  
-                max_age_index = [x.age for x in complex_hh_members].index(max([x.age for x in complex_hh_members]))
-                family_wealth_level = complex_hh_members[max_age_index].wealth_level
-                if len(complex_hh_members) == 1:
-                    population.remove(member)
-                    member.family_role = "head"
-                    self.families.append(member)
-                for member in complex_hh_members:
-                    population.remove(member)  
-                    member.make_household_link(complex_hh_members)  
-                    member.wealth_level = family_wealth_level
-                    member.family_role = "complex"
-                if len(complex_hh_members) > 1:
-                    self.families.append(complex_hh_members)
+        for size in self.hh_size:
+            success, hh_members, nb_attempts = self.attempt_to_form_household(size, population, max_attempts_by_size)
+            if success:
+                self.finalize_successful_household(hh_members)
+                attempts_list.append(nb_attempts)
+            else:
+                complex_hh_sizes.append(size)
+
+        self.remove_unsuccessful_agents(population)
+        return
+
+    def attempt_to_form_household(self, size, population, max_attempts_by_size):
+        success = False
+        nb_attempts = 0
+
+        while not success and nb_attempts < max_attempts_by_size:
+            nb_attempts += 1
+            hh_members = self.generate_household_members(size, population)
+
+            if len(hh_members) == size:
+                success = True
+
+        return success, hh_members, nb_attempts
+
+    def generate_household_members(self, size, population):
+        hh_members = []
+
+        head_age = pick_from_pair_list(self.head_age_dist[size], self.random)
+        if size == 1:
+            male_wanted = self.random.random() < self.proportion_of_male_singles_by_age[head_age]
+            head = pick_from_population_pool_by_age_and_gender(head_age, male_wanted, population, self.random)
+            if head:
+                head.family_role = "head"
+                hh_members.append(head)
+        else:
+            hh_members = self.generate_complex_household_members(size, head_age, population)
+
+        return hh_members
+
+    def generate_complex_household_members(self, size, head_age, population):
+        hh_members = []
+
+        hh_type = pick_from_pair_list(self.hh_type_dist[head_age], self.random)
+        male_head = self.random.random() < float(self.p_single_father.columns.to_list()[0]) if hh_type == "single_parent" else True
+        mother_age = pick_from_pair_list(self.partner_age_dist[head_age], self.random) if male_head else head_age
+
+        head = pick_from_population_pool_by_age_and_gender(head_age, male_head, population, self.random)
+        if head:
+            hh_members.append(head)
+            head.family_role = "head"
+
+            if hh_type == "couple":
+                mother = pick_from_population_pool_by_age_and_gender(mother_age, False, population, self.random)
+                if mother:
+                    hh_members.append(mother)
+                    mother.family_role = "partner"
+
+            hh_members.extend(self.generate_children(int(size - len(hh_members)), mother_age, population))
+
+        return hh_members
+
+    def generate_children(self, num_children, mother_age, population):
+        children = []
+        if num_children in self.children_age_dist and mother_age in self.children_age_dist[num_children]:
+            children_age_dist_for_mother = self.children_age_dist[num_children][mother_age]
+            for _ in range(num_children):
+                child_age = pick_from_pair_list(children_age_dist_for_mother, self.random)
+                child = pick_from_population_pool_by_age(child_age, population, self.random)
+                if child:
+                    child.family_role = "child"
+                    children.append(child)
+
+        return children
+
+    def finalize_successful_household(self, hh_members):
+        family_wealth_level = hh_members[0].wealth_level
+
+        if len(hh_members) > 1 and hh_members[1].family_role == "partner":
+            hh_members[0].make_partner_link(hh_members[1])
+            couple = hh_members[:2]
+            offsprings = hh_members[2:]
+
+            for partner in couple:
+                partner.make_parent_offsprings_link(offsprings)
+            for sibling in offsprings:
+                sibling.add_sibling_link(offsprings)
+
+        for member in hh_members:
+            member.make_household_link(hh_members)
+            member.wealth_level = family_wealth_level
+
+        self.families.append(hh_members)
+
+    def remove_unsuccessful_agents(self, population):
+        print(f"Removing {len(population)} agents.")
+        for m in population:
+            self.schedule.agents.remove(m)
+
 
     def setup_siblings(self) -> None:
         """
@@ -476,7 +479,7 @@ class CrimeModel(mesa.Model):
         members_per_family = max(1, int(scaled_num_oc_persons / scaled_num_oc_families))  # Ensure at least 1 member per family
         print(f"Members per family: {members_per_family}")
         print(f"Families: {scaled_num_oc_families}")
-        oc_family_heads = weighted_n_of(scaled_num_oc_families, self.schedule.agents,
+        oc_family_heads = weighted_n_of(scaled_num_oc_families, [agent for agent in self.schedule.agents if agent.gender_is_male],
                                         lambda x: x.criminal_tendency, self.random)
         graphs = []
         for head in oc_family_heads:
@@ -495,7 +498,13 @@ class CrimeModel(mesa.Model):
                 missing_n = members_per_family - len(cosca)
                 broader_family_candidates = self.collect_out_of_family_candidates(head, cosca, missing_n)
                 additional_members = weighted_n_of(missing_n, broader_family_candidates, lambda x: x.criminal_tendency, self.random)
-                cosca.update(self.assign_additional_members(additional_members, cosca, head))
+                cosca.update(self.assign_additional_members(additional_members, cosca, head, fill = True))
+            if len(cosca) < members_per_family:
+                missing_n = members_per_family - len(cosca)
+                out_of_family_candidates = [agent for agent in self.schedule.agents
+                                        if not agent.oc_member and agent.age >= 18]
+                out_of_family_candidates = weighted_n_of(missing_n, out_of_family_candidates, lambda x: x.criminal_tendency, self.random)
+                cosca.update(self.assign_additional_members(out_of_family_candidates, cosca, head, fill = True))
             head.oc_subordinates = cosca
             cosca_graph = nx.Graph()
             cosca_graph.add_node(head)
@@ -520,10 +529,11 @@ class CrimeModel(mesa.Model):
         cosca = set()
         members_in_families = weighted_n_of(min(members_per_family, len(candidates)), candidates, lambda x: x.criminal_tendency, self.random)
         for member in members_in_families:
-            member.oc_member = True
-            member.oc_role = "soldier"
-            member.oc_boss = head
-            cosca.add(member)
+            if member != head:  # Ensure head is not included
+                member.oc_member = True
+                member.oc_role = "soldier"
+                member.oc_boss = head
+                cosca.add(member)
         return cosca
 
     def collect_out_of_family_candidates(self, head, cosca, missing_n):
@@ -538,16 +548,18 @@ class CrimeModel(mesa.Model):
                         return out_of_family_candidates
         return out_of_family_candidates
 
-    def assign_additional_members(self, additional_members, cosca, head):
+    def assign_additional_members(self, additional_members, cosca, head, fill=False):
         for candidate in additional_members:
-            candidate.oc_member = True
-            candidate.oc_role = "soldier"
-            candidate.oc_boss = head
-            cosca.add(candidate)
-            for household_member in candidate.neighbors["household"]:
-                if household_member.age >= 18:
-                    household_member.oc_member = True
-                    household_member.oc_boss = head
+            if candidate != head:  # Ensure head is not included
+                candidate.oc_member = True
+                candidate.oc_role = "soldier"
+                candidate.oc_boss = head
+                cosca.add(candidate)
+                if fill:
+                    for household_member in candidate.neighbors["household"]:
+                        if household_member.age >= 18:
+                            household_member.oc_member = True
+                            household_member.oc_boss = head
         return cosca
 
 
