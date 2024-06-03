@@ -9,9 +9,9 @@ import random
 from itertools import combinations
 
 class CrimeModel(mesa.Model):
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    def __init__(self, N, model_params = {"no-params":"empty"}, agent_params = {"no-params":"empty"}):
+    def __init__(self, N, current_directory, model_params = {"no-params":"empty"}, agent_params = {"no-params":"empty"}):
         super().__init__()
+        self.current_directory = current_directory
         self.families = list()
         self.mafia_heads = set()
         self.ticks_per_year = 12
@@ -53,17 +53,17 @@ class CrimeModel(mesa.Model):
         self.setup_oc_groups2()
         
     def init_data_employed(self):
-        self.age_gender_dist = read_csv_data("initial_age_gender_dist").values.tolist()
-        self.head_age_dist = df_to_dict(read_csv_data("head_age_dist_by_household_size"))
-        self.proportion_of_male_singles_by_age = df_to_dict(read_csv_data("proportion_of_male_singles_by_age"))
-        self.hh_type_dist = df_to_dict(read_csv_data("household_type_dist_by_age"))
-        self.partner_age_dist = df_to_dict(read_csv_data("partner_age_dist"))
-        self.children_age_dist = df_to_dict(read_csv_data("children_age_dist"))
-        self.p_single_father = read_csv_data("proportion_single_fathers")
-        self.edu = df_to_dict(read_csv_data("edu"))
-        self.work_status_by_edu_lvl = df_to_dict(read_csv_data("work_status_by_edu_lvl"))
-        self.wealth_quintile_by_work_status = df_to_dict(read_csv_data("wealth_quintile_by_work_status"))
-        self.c_range_by_age_and_sex = df_to_lists(read_csv_data("crime_rate_by_gender_and_age_range"))
+        self.age_gender_dist = read_csv_data("initial_age_gender_dist", self.current_directory).values.tolist()
+        self.head_age_dist = df_to_dict(read_csv_data("head_age_dist_by_household_size", self.current_directory))
+        self.proportion_of_male_singles_by_age = df_to_dict(read_csv_data("proportion_of_male_singles_by_age", self.current_directory))
+        self.hh_type_dist = df_to_dict(read_csv_data("household_type_dist_by_age", self.current_directory))
+        self.partner_age_dist = df_to_dict(read_csv_data("partner_age_dist", self.current_directory))
+        self.children_age_dist = df_to_dict(read_csv_data("children_age_dist", self.current_directory))
+        self.p_single_father = read_csv_data("proportion_single_fathers", self.current_directory)
+        self.edu = df_to_dict(read_csv_data("edu", self.current_directory))
+        self.work_status_by_edu_lvl = df_to_dict(read_csv_data("work_status_by_edu_lvl", self.current_directory))
+        self.wealth_quintile_by_work_status = df_to_dict(read_csv_data("wealth_quintile_by_work_status", self.current_directory))
+        self.c_range_by_age_and_sex = df_to_lists(read_csv_data("crime_rate_by_gender_and_age_range", self.current_directory))
     
     def cleanup_unfit_individuals(self):
         for a in self.schedule.agents:

@@ -5,8 +5,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
-def read_csv_data( filename: str) -> pd.DataFrame:
-    current_directory = os.path.dirname(os.path.abspath(__file__))
+def read_csv_data(filename, current_directory) -> pd.DataFrame:
     return pd.read_csv(os.path.join(current_directory, filename + ".csv"))
 
 def df_to_dict(df: pd.DataFrame, extra_depth: bool = False):

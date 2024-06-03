@@ -6,8 +6,9 @@ import random
 import os
 from collections import defaultdict
 
+local = True
 
-def print_report(model, save_to_file=False, age_category_width=15):
+def print_report(model, current_directory, save_to_file=False, age_category_width=15):
     report_lines = []
 
     # Function to print details of a family
@@ -123,7 +124,6 @@ def print_report(model, save_to_file=False, age_category_width=15):
         crime_report += "\n"
     report_str += crime_report
     if save_to_file:
-        current_directory = os.path.dirname(os.path.abspath(__file__))
         report_path = os.path.join(current_directory, "report.txt")
         with open(report_path, "w") as file:
             file.write(report_str)
@@ -191,8 +191,10 @@ def show_graphs(model):
     plt.show()
 
 if __name__ == "__main__":
+    if local:
+        current_directory = os.path.dirname(os.path.abspath(__file__))
     start_time = time.time()
-    m = CrimeModel(5000)
+    m = CrimeModel(5000, current_directory = current_directory)
     print("--- %s seconds --- (To calculate)" % (time.time() - start_time))
-    print_report(m, True)
+    print_report(m, current_directory, True)
     show_graphs(m)
