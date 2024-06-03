@@ -12,8 +12,11 @@ class CrimeModel(mesa.Model):
     def __init__(self, N, current_directory, model_params = {"no-params":"empty"}, agent_params = {"no-params":"empty"}):
         super().__init__()
         self.current_directory = current_directory
+        self.number_weddings = 0
+        self.number_deceased = 0
         self.families = list()
         self.mafia_heads = set()
+        self.tick = 0
         self.ticks_per_year = 12
         self.nat_propensity_m: float = 1.0  # 0.1 -> 10
         self.nat_propensity_sigma: float = 0.25  # 0.1 -> 10.0
@@ -40,6 +43,7 @@ class CrimeModel(mesa.Model):
             }
         )
         self.setup()
+
     def setup(self):
         self.init_data_employed()
         self.init_agents()
@@ -51,7 +55,15 @@ class CrimeModel(mesa.Model):
         self.calculate_crime_multiplier()
         self.calculate_criminal_tendency()
         self.setup_oc_groups2()
-        
+    
+    def step(self):
+        for agent in self.schedule.agents:
+            agent.ticks += 1
+            if agent.ticks % 12 == 0:
+                agent.age += 1
+        self.make_people_die()
+        self.wedding()
+
     def init_data_employed(self):
         self.age_gender_dist = read_csv_data("initial_age_gender_dist", self.current_directory).values.tolist()
         self.head_age_dist = df_to_dict(read_csv_data("head_age_dist_by_household_size", self.current_directory))
@@ -61,10 +73,14 @@ class CrimeModel(mesa.Model):
         self.children_age_dist = df_to_dict(read_csv_data("children_age_dist", self.current_directory))
         self.p_single_father = read_csv_data("proportion_single_fathers", self.current_directory)
         self.edu = df_to_dict(read_csv_data("edu", self.current_directory))
+        self.mortality_table = df_to_dict(read_csv_data("initial_mortality_rates", self.current_directory), extra_depth=True)
         self.work_status_by_edu_lvl = df_to_dict(read_csv_data("work_status_by_edu_lvl", self.current_directory))
         self.wealth_quintile_by_work_status = df_to_dict(read_csv_data("wealth_quintile_by_work_status", self.current_directory))
         self.c_range_by_age_and_sex = df_to_lists(read_csv_data("crime_rate_by_gender_and_age_range", self.current_directory))
-    
+        marriage = read_csv_data("marriages_stats", self.current_directory)
+        self.number_weddings_mean = marriage['mean_marriages'][0]
+        self.number_weddings_sd = marriage['std_marriages'][0]
+
     def cleanup_unfit_individuals(self):
         for a in self.schedule.agents:
             if a.family_role == None:
@@ -77,7 +93,7 @@ class CrimeModel(mesa.Model):
         :param size: int, population size
         :return: list, the sizes of household
         """
-        hh_size_dist = read_csv_data("household_size_dist").values
+        hh_size_dist = read_csv_data("household_size_dist", self.current_directory).values
         sizes = []
         current_sum = 0
         while current_sum < size:
@@ -562,5 +578,80 @@ class CrimeModel(mesa.Model):
                             household_member.oc_boss = head
         return cosca
 
+    def make_people_die(self) -> None:
+        dead_agents = list()
+        permuted = self.random.permuted(self.schedule.agents)
+        for agent in permuted:
+            if self.random.random() < agent.p_mortality() or agent.age > 119:
+                dead_agents.append(agent)
+                self.number_deceased += 1
+        for agent in dead_agents:
+            agent.die()
+            del agent
 
+    def wedding(self) -> None:
+        corrected_weddings_mean = (self.number_weddings_mean * len(self.schedule.agents) / 1000) / 12
+        num_wedding_this_month = self.random.poisson(corrected_weddings_mean)
+        marriable = [agent for agent in self.schedule.agents if 25 < agent.age < 55
+                    and not agent.neighbors.get("partner")]
+        
+        while num_wedding_this_month > 0 and len(marriable) > 1:
+            ego = self.random.choice(marriable)
+            friends = ego.neighbors.get("friendship")
+            
+            if not friends:
+                continue
+            
+            partner = None
+            best_similarity_score = float('inf')
+            
+            for friend in friends:
+                if 25 < friend.age < 55 and not friend.neighbors.get("partner"):
+                    similarity_score = self.calculate_similarity_wedding(ego, friend)
+                    if similarity_score < best_similarity_score:
+                        best_similarity_score = similarity_score
+                        partner = friend
+            if partner:
+                for agent in [ego, partner]:
+                    agent.remove_from_household()
+                ego.neighbors.get("household").add(partner)
+                partner.neighbors.get("household").add(ego)
+                ego.neighbors.get("partner").add(partner)
+                partner.neighbors.get("partner").add(ego)
+                marriable.remove(partner)
+                num_wedding_this_month -= 1
+                self.number_weddings += 1
+            marriable.remove(ego)
 
+    def calculate_similarity_wedding(self, agent, potential_partner):
+            age_diff = abs(agent.age - potential_partner.age)
+            gender_diff = int(agent.gender_is_male != potential_partner.gender_is_male)
+            education_diff = abs(agent.education_level - potential_partner.education_level)
+            wealth_diff = abs(agent.wealth_level - potential_partner.wealth_level)
+
+            age_weight = 3.0
+            gender_weight = 2.0
+            education_weight = 1.0
+            wealth_weight = 1.0
+
+            # Favor older male for female agents and younger female for male agents
+            if agent.gender_is_male:
+                if potential_partner.age >= agent.age:
+                    age_preference_score = max(0, 8 - age_diff)  # Favor younger female partners
+                else:
+                    age_preference_score = max(0, 8 - age_diff) / 2  # Reduce score for older female partners
+            else:
+                if potential_partner.age <= agent.age:
+                    age_preference_score = max(0, 8 - age_diff)  # Favor older male partners
+                else:
+                    age_preference_score = max(0, 8 - age_diff) / 2  # Reduce score for younger male partners
+
+            # Calculate the similarity score
+            similarity_score = (
+                age_weight * (8 - age_preference_score) + 
+                gender_weight * gender_diff + 
+                education_weight * education_diff + 
+                wealth_weight * wealth_diff
+            )
+
+            return similarity_score

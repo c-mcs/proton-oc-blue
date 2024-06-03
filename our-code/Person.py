@@ -1,5 +1,4 @@
 import mesa
-import names
 from extras import *
 
 class Person(mesa.Agent):
@@ -27,11 +26,10 @@ class Person(mesa.Agent):
         self.oc_boss = None
         self.oc_subordinates = None
         self.family_role = None
-        self.name = names.get_full_name()
         row = weighted_one_of(self.model.age_gender_dist, lambda x: x[-1],
                                     self.model.random)  # select a row from our age_gender distribution
         self.birth_tick = 0 - row[0] * self.model.ticks_per_year
-        #self.age = (self.model.tick - self.birth_tick) / self.model.ticks_per_year # to fix?
+        self.ticks = 0
         self.age = row[0]
         self.gender_is_male = bool(row[1])  # ...and gender according to values in that row.
         self.retired = self.age >= self.model.retirement_age  # persons older than retirement_age are retired
@@ -138,3 +136,53 @@ class Person(mesa.Agent):
             return list(agent_net)
         else:
             return []
+    
+    def get_all_agents(self):
+        """
+        Given a list of network names, this method returns a set of all agents
+        within these networks, without repetitions.
+        :param network_names: list, the list of network names
+        :return: set, a set of all agents in all networks
+        """
+        all_agents = set()
+        for net_name in self.network_names:
+            agents = self.get_neighbor_list(net_name)
+            all_agents.update(agents)
+        return all_agents
+    
+    def remove_from_model_graphs(self):
+        for family in self.model.families:
+            if self in family:
+                family.remove(self)
+                break
+        if self in self.model.friends_graph:
+            self.model.friends_graph.remove_node(self)
+        if self in self.model.crime_communities_graph:
+            self.model.crime_communities_graph.remove_node(self)
+
+    def remove_from_household(self) -> None:
+        """
+        This method removes the agent from household, keeping the networks consistent.
+        Modify the Person.neighbors attribute in-place
+        :return: None
+        """
+        for member in self.neighbors.get("household").copy():
+            if self in member.neighbors.get("household"):
+                member.neighbors.get("household").remove(self)
+                self.neighbors.get("household").remove(member)
+                
+    def p_mortality(self):
+        if self.age in self.model.mortality_table:
+            p = self.model.mortality_table[self.age][self.gender_is_male] / self.model.ticks_per_year
+        elif self.age > max(self.model.mortality_table):
+            p = 1
+        return p
+    
+    def die(self):
+        neighbors = self.get_all_agents()
+        for agent in neighbors:
+            for network in agent.network_names:
+                if self in agent.neighbors.get(network):
+                    agent.neighbors.get(network).remove(self)
+        self.model.schedule.remove(self)
+        self.remove_from_model_graphs()

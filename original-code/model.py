@@ -233,9 +233,9 @@ class ProtonOC(Model):
         :return: None
         """
         for agent in self.schedule.agents:
-            agent.num_crimes_committed_this_tick = 0
-            agent.calculate_age()
-        self.number_law_interventions_this_tick = 0
+            agent.num_crimes_committed_this_tick = 0 # TODO
+            agent.calculate_age() # DONE
+        self.number_law_interventions_this_tick = 0 # TODO
         if self.intervention_is_on():
             if self.family_intervention:
                 self.family_intervene()
@@ -245,18 +245,18 @@ class ProtonOC(Model):
                 self.welfare_intervene()
             # OC-members-repression works in arrest-probability-with-intervention in commmit-crime
         if (self.tick % self.ticks_per_year) == 0 or self.tick == 1:
-            self.calculate_criminal_tendency()
+            self.calculate_criminal_tendency() # TODO?
             self.calculate_crime_multiplier()  # we should update it, if population change
             self.graduate_and_enter_jobmarket()
             # updates neet status only when changing age range (the age is a key of the table)
             for agent in [agent for agent in self.schedule.agents
                           if agent.job_level < 2 and agent.just_changed_age() and
                           agent.age in self.labour_status_range[agent.gender_is_male].keys()]:
-                agent.update_unemployment_status()
+                agent.update_unemployment_status() # TODO
             for agent in [agent for agent in self.schedule.agents
                           if not agent.my_school and 18 <= agent.age < self.retirement_age
                           and not agent.my_job and not agent.retired and agent.job_level > 1]:
-                agent.find_job()
+                agent.find_job() # TODO
                 if agent.my_job:
                     total_pool = [candidate for candidate in agent.my_job.my_employer.employees()
                                   if candidate != agent]
@@ -267,20 +267,20 @@ class ProtonOC(Model):
                     agent.make_professional_link(employees)
             self.let_migrants_in()
             self.return_kids()
-        self.wedding()
+        self.wedding() # DONE
         self.reset_oc_embeddedness()
-        self.commit_crimes()
-        self.retire_persons()
-        self.make_baby()
-        self.remove_excess_friends()
+        self.commit_crimes() # TODO
+        self.retire_persons() # TODO
+        self.make_baby() # TODO
+        self.remove_excess_friends() # TODO
         self.remove_excess_professional_links()
-        self.make_friends()
+        self.make_friends() # TODO
         for agent in self.schedule.agents:
             if agent.prisoner:
                 agent.sentence_countdown -= 1
                 if agent.sentence_countdown == 0:
                     agent.prisoner = False
-        self.make_people_die()
+        self.make_people_die() # TODO
         self.schedule.step()
         self.calculate_fast_reporters()
         self.datacollector.collect(self)

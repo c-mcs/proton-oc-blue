@@ -8,7 +8,7 @@ from collections import defaultdict
 
 local = True
 
-def print_report(model, current_directory, save_to_file=False, age_category_width=15):
+def print_report(model, current_directory, tag, save_to_file=False, age_category_width=15):
     report_lines = []
 
     # Function to print details of a family
@@ -44,6 +44,7 @@ def print_report(model, current_directory, save_to_file=False, age_category_widt
     # Sample 10% of the agents
     agents = list(model.schedule.agents)
     num_agents_sample = max(1, int(len(agents) * 0.1))
+    print(f"NUMAGENTS {len(agents)}")
     sampled_agents = random.sample(agents, num_agents_sample)
 
     # Collect agent and friends details
@@ -124,7 +125,8 @@ def print_report(model, current_directory, save_to_file=False, age_category_widt
         crime_report += "\n"
     report_str += crime_report
     if save_to_file:
-        report_path = os.path.join(current_directory, "report.txt")
+        filename = f"report{tag}.txt"
+        report_path = os.path.join(current_directory, filename)
         with open(report_path, "w") as file:
             file.write(report_str)
     else:
@@ -196,5 +198,12 @@ if __name__ == "__main__":
     start_time = time.time()
     m = CrimeModel(5000, current_directory = current_directory)
     print("--- %s seconds --- (To calculate)" % (time.time() - start_time))
-    print_report(m, current_directory, True)
-    show_graphs(m)
+    print_report(m, current_directory, "1", True)
+    #show_graphs(m)
+    j = 0
+    for i in range(360):
+        m.step()
+        if i % 72 == 0:
+            j+=1
+            print_report(m, current_directory, str(j), True)
+    print(f"NUMBER WEDDINGS: {m.number_weddings}")
