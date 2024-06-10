@@ -36,6 +36,7 @@ class CrimeModel(mesa.Model):
         self.arrest_rate = self.number_arrests_per_year / self.ticks_per_year / self.number_crimes_yearly_per10k / 10000 * self.initial_agents
         self.num_oc_persons: int = 30  # 2 -> 200
         self.num_oc_families: int = 8  # 1 -> 50
+        self.number_born = 0
 
         self.datacollector = mesa.datacollection.DataCollector(
             model_reporters={
@@ -55,14 +56,25 @@ class CrimeModel(mesa.Model):
         self.calculate_crime_multiplier()
         self.calculate_criminal_tendency()
         self.setup_oc_groups2()
+
+        for agent in self.schedule.agents:
+            if not agent.gender_is_male and agent.get_neighbor_list("offspring"):
+                agent.number_of_children = len(agent.get_neighbor_list("offspring"))
     
     def step(self):
         for agent in self.schedule.agents:
             agent.ticks += 1
             if agent.ticks % 12 == 0:
                 agent.age += 1
+        self.tick += 1
         self.make_people_die()
         self.wedding()
+        self.make_baby()
+        self.retire_persons()
+        if self.tick % 12 == 0:
+            self.update_education_wealth_job()
+            self.update_friendships()
+            self.add_immigrants()
 
     def init_data_employed(self):
         self.age_gender_dist = read_csv_data("initial_age_gender_dist", self.current_directory).values.tolist()
@@ -80,6 +92,8 @@ class CrimeModel(mesa.Model):
         marriage = read_csv_data("marriages_stats", self.current_directory)
         self.number_weddings_mean = marriage['mean_marriages'][0]
         self.number_weddings_sd = marriage['std_marriages'][0]
+        self.fertility_table = df_to_dict(read_csv_data("initial_fertility_rates", self.current_directory), extra_depth=True)
+
 
     def cleanup_unfit_individuals(self):
         for a in self.schedule.agents:
@@ -107,11 +121,17 @@ class CrimeModel(mesa.Model):
     def lognormal(self, mu, sigma) -> float:
         return np.exp(mu + sigma * self.random.normal())
     
-    def init_agents(self):
-        for i in range(self.initial_agents):
+    def init_agents(self, immigrants = None):
+        if immigrants:
+            N = immigrants
+        else:
+            N = self.initial_agents
+        for i in range(N):
             new_agent = Person(i, self)
             new_agent.init_person()
             self.schedule.add(new_agent)
+            if immigrants:
+                new_agent.immigrant = True
 
     def calculate_similarity(self, agent, potential_friend):
         age_diff = abs(agent.age - potential_friend.age)
@@ -348,7 +368,7 @@ class CrimeModel(mesa.Model):
             for target in other_targets:
                 target.add_sibling_link(other_targets)
 
-    def assign_jobs_and_wealth(self) -> None:
+    def assign_jobs_and_wealth(self, single_agent = None) -> None:
         """
         This procedure modifies the job_level and wealth_level attributes of agents in-place.
         This is just a first assignment, and will be modified first by the multiplier then
@@ -356,7 +376,10 @@ class CrimeModel(mesa.Model):
 
         :return: None
         """
+        
         permuted_set = self.random.permuted(self.schedule.agents)
+        if single_agent:
+            permuted_set = [single_agent]
         for agent in permuted_set:
             if agent.age > 16:
                 agent.job_level = pick_from_pair_list(
@@ -655,3 +678,97 @@ class CrimeModel(mesa.Model):
             )
 
             return similarity_score
+
+
+    def make_baby(self):
+        for agent in [agent for agent in self.schedule.agents if
+                          14 <= agent.age <= 50 and not agent.gender_is_male]:
+                if self.random.random() < agent.p_fertility():
+                    agent.init_baby()
+
+
+    def retire_persons(self) -> None:
+        """
+        Agents that reach the self.retirement_age are retired.
+        :return: None
+        """
+        to_retire = [agent for agent in self.schedule.agents
+                     if agent.age >= self.retirement_age and not agent.retired]
+        for agent in to_retire:
+            agent.retired = True
+
+    def update_education_wealth_job(self):
+        agents_filtered = [agent for agent in self.schedule.agents if agent.age == 13 or agent.age >= 18]
+        for agent in agents_filtered:
+            just_changed = False
+            if agent.age == 13 or agent.age == 18 or agent.age == 21:
+                education = agent.education_level
+                agent.education_level = min(agent.education_level, pick_from_pair_list(self.edu[agent.gender_is_male], self.random))
+                if education != agent.education_level:
+                    just_changed = True
+            if agent.age > 16 and just_changed:
+                self.assign_jobs_and_wealth(agent)
+
+    def update_friendships(self):
+        X = 0.1  # 10% probability
+        update_share = 0.1  # 10% of the friendship pool
+
+        agents = list(self.schedule.agents)
+        self.random.shuffle(agents) 
+
+        for agent in agents:
+            if self.random.random() < X:
+                # Determine the number of friendships to be renovated
+                current_friends = list(agent.neighbors['friendship'])
+                current_friends_n = len(current_friends)
+                if not current_friends:
+                    current_friends_n = random.randint(1,4)  # Skip the agent if it has no friends
+
+                num_friends_to_renovate = max(1, int(current_friends_n * update_share))
+                
+                # Break existing friendships
+                if num_friends_to_renovate > 0 and current_friends:
+                    friends_to_remove = self.random.choice(current_friends, num_friends_to_renovate, replace=False)
+                    for friend in friends_to_remove:
+                        agent.break_friendship_link(friend)
+
+                # Create new friendships using the similarity process
+                excluded_neighbors = agent.get_all_relatives()
+                potential_friends = [a for a in agents if a != agent and a not in excluded_neighbors]
+                sample_size = min(int(self.initial_agents / 3), len(potential_friends))  # Limit the sample size to 1/3(N) or total agents - 1
+
+                if len(potential_friends) > sample_size:
+                    potential_friends = self.random.choice(potential_friends, sample_size, replace=False)
+
+                if len(potential_friends) == 0:
+                    continue
+
+                potential_friends = [friend for friend in potential_friends if self.calculate_similarity(agent, friend) < 100.0]
+                if len(potential_friends) == 0:
+                    continue
+                
+                similarity_scores = np.array([self.calculate_similarity(agent, a) for a in potential_friends])
+                inv_similarity_scores = 1 / (similarity_scores + 1e-6)
+                probabilities = inv_similarity_scores / inv_similarity_scores.sum()
+                actual_num_friends = min(num_friends_to_renovate, len(potential_friends))  # Ensure actual_num_friends does not exceed potential friends
+
+                if actual_num_friends > 0:
+                    selected_friends = self.random.choice(potential_friends, size=actual_num_friends, replace=False, p=probabilities)
+                    for friend in selected_friends:
+                        agent.make_friendship_link(friend)
+                    
+        # Update the friends graph
+        self.friends_graph.clear()
+        for agent in self.schedule.agents:
+            self.friends_graph.add_node(agent.unique_id)
+            for friend in agent.neighbors['friendship']:
+                self.friends_graph.add_edge(agent.unique_id, friend.unique_id)
+
+        # Debug: Print the number of edges to verify links
+        print(f"Number of friendships (updated): {self.friends_graph.number_of_edges()}")
+
+    def add_immigrants(self):
+        n_immigrants = int(self.initial_agents * 0.01)
+        self.init_agents(n_immigrants)
+
+            

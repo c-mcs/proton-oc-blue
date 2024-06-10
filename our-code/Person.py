@@ -21,6 +21,8 @@ class Person(mesa.Agent):
         stats_tables as part of the initial setup of the model agents.
         :return: None
         """
+        self.immigrant = False
+        self.number_of_children = 0
         self.oc_member = False
         self.oc_role = None
         self.oc_boss = None
@@ -49,6 +51,7 @@ class Person(mesa.Agent):
         self.job_level = 0
         self.wealth_level = 0 # job e wealth level le mettiamo con un'altra funzione ma è bene ricordarci che sono variabili dell'agente
         self.num_co_offenses = {}
+
 
     def step(self):
         return None
@@ -186,3 +189,60 @@ class Person(mesa.Agent):
                     agent.neighbors.get(network).remove(self)
         self.model.schedule.remove(self)
         self.remove_from_model_graphs()
+
+    def p_fertility(self) -> float:
+        """
+        Calculate the fertility
+        :return: flot, the fertility
+        """
+        if np.min([self.number_of_children, 2]) in self.model.fertility_table[self.age]:
+            return self.model.fertility_table[self.age][np.min([self.number_of_children, 2])] / self.model.ticks_per_year
+        else:
+            return 0
+        
+    def init_baby(self) -> None:
+        """
+        This method is for mothers only and allows to create new agents
+        :return: None
+        """
+        self.number_of_children += 1
+        self.model.number_born += 1
+        index = len(self.model.agents) + 1
+        new_agent = Person(index, self.model)
+        new_agent.age = 0
+        self.model.schedule.add(new_agent)
+        new_agent.wealth_level = self.wealth_level
+        new_agent.birth_tick = self.model.tick
+        new_agent.wealth_level = self.wealth_level
+        new_agent.mother = self
+        
+        if self.get_neighbor_list("offspring"):
+            new_agent.add_sibling_link(self.get_neighbor_list("offspring"))
+        self.make_parent_offsprings_link(new_agent)
+        if self.get_neighbor_list("partner"):
+            dad = self.get_neighbor_list("partner")[0]
+            dad.make_parent_offsprings_link(new_agent)
+            new_agent.father = dad
+            new_agent.wealth_level = dad.wealth_level
+        new_agent.make_household_link(self.get_neighbor_list("household"))
+
+        new_agent.number_of_children = 0
+        new_agent.oc_member = False
+        new_agent.oc_role = None
+        new_agent.oc_boss = None
+        new_agent.oc_subordinates = None
+        new_agent.family_role = "child"
+        
+        new_agent.ticks = 0
+
+        new_agent.education_level = 1.0
+        new_agent.gender_is_male = self.model.random.choice([True, False])  # True male False female
+
+        new_agent.propensity = self.model.lognormal(self.model.nat_propensity_m, self.model.nat_propensity_sigma)
+        new_agent.job_level = 0 # job e wealth level le mettiamo con un'altra funzione ma è bene ricordarci che sono variabili dell'agente
+        new_agent.num_co_offenses = {}
+        new_agent.networks_init()
+
+    def break_friendship_link(self, asker):
+        self.neighbors.get("friendship").remove(asker)
+        asker.neighbors.get("friendship").remove(self)

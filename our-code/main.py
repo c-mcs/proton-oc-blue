@@ -196,7 +196,7 @@ if __name__ == "__main__":
     if local:
         current_directory = os.path.dirname(os.path.abspath(__file__))
     start_time = time.time()
-    m = CrimeModel(5000, current_directory = current_directory)
+    m = CrimeModel(1000, current_directory = current_directory)
     print("--- %s seconds --- (To calculate)" % (time.time() - start_time))
     print_report(m, current_directory, "1", True)
     #show_graphs(m)
@@ -206,4 +206,4 @@ if __name__ == "__main__":
         if i % 72 == 0:
             j+=1
             print_report(m, current_directory, str(j), True)
-    print(f"NUMBER WEDDINGS: {m.number_weddings}")
+    
