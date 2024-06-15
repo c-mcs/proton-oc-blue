@@ -2,7 +2,6 @@ import os
 import numpy as np
 import mesa
 import networkx as nx
-from protonoc.simulator.extra import list_contains_problems
 from Person import Person
 from extras import *
 import random

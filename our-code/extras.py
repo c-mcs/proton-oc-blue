@@ -248,3 +248,21 @@ def commit_crime(co_offenders) -> None:
             co_offender.co_off_flag[co_off_key] += 1
             if co_offender.co_off_flag[co_off_key] == 2:
                 co_offender.num_co_offenses[co_off_key] += 1
+
+def list_contains_problems(ego, candidates):
+    """
+    This procedure checks if there are any links between partners within the candidate pool.
+    Returns True if there are, None if there are not. It is used during ProtonOc.setup_siblings
+    procedure to avoid incestuous marriages.
+    :param ego: Person, the agent
+    :param candidates: Union[List[Person], Set[Person]], the candidates
+    :return: Union[bool, None], True if there are links between partners, None otherwise.
+    """
+    all_potential_siblings = [ego] + ego.get_neighbor_list("sibling") + candidates + [sibling for candidate in
+                                                                                      candidates for sibling in
+                                                                                      candidate.neighbors.get(
+                                                                                          'sibling')]
+    for sibling in all_potential_siblings:
+        if sibling.get_neighbor_list("partner") and sibling.get_neighbor_list("partner")[
+            0] in all_potential_siblings:
+            return True
