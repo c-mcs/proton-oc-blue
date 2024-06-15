@@ -227,3 +227,24 @@ def list_contains_problems(ego, candidates):
         if sibling.get_neighbor_list("partner") and sibling.get_neighbor_list("partner")[
             0] in all_potential_siblings:
             return True
+
+def commit_crime(co_offenders) -> None:
+    """
+    This procedure modify in-place the num_crimes_committed,num_crimes_committed_this_tick, co_off_flag and num_co_offenses
+    attributes of the Person objects passed to co_offenders
+    :param co_offenders: list, of Person object
+    :return: None
+    """
+    for co_offender in co_offenders:
+        co_offender.num_crimes_committed += 1
+        co_offender.num_crimes_committed_this_tick += 1
+        other_co_offenders = [agent for agent in co_offenders if agent != co_offender]
+        for agent in other_co_offenders:
+            if agent not in co_offender.neighbors.get("criminal"):
+                co_offender.add_criminal_link(agent)
+                co_offender.co_off_flag[agent] = 0
+    for co_offender in co_offenders:
+        for co_off_key in co_offender.co_off_flag.keys():
+            co_offender.co_off_flag[co_off_key] += 1
+            if co_offender.co_off_flag[co_off_key] == 2:
+                co_offender.num_co_offenses[co_off_key] += 1

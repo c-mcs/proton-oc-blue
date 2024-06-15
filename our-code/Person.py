@@ -1,5 +1,7 @@
 import mesa
 from extras import *
+from itertools import chain
+import networkx as nx
 
 class Person(mesa.Agent):
     network_names = [
@@ -14,13 +16,9 @@ class Person(mesa.Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.neighbors = self.networks_init()
-
-    def init_person(self) -> None:
-        """
-        This method modifies the attributes of the person instance based on the model's
-        stats_tables as part of the initial setup of the model agents.
-        :return: None
-        """
+        self.num_crimes_committed = 0
+        self.num_crimes_committed_this_tick = 0
+        self.new_recruit = -2
         self.immigrant = False
         self.number_of_children = 0
         self.oc_member = False
@@ -28,6 +26,22 @@ class Person(mesa.Agent):
         self.oc_boss = None
         self.oc_subordinates = None
         self.family_role = None
+        self.arrest_weight = 0
+        self.num_co_offenses = dict()  # criminal-links
+        self.co_off_flag = dict()  # criminal-links
+        self.job_level = 0
+        self.wealth_level = 0
+        self.criminal_tendency = 0
+        self.mother = None
+        self.father = None
+
+    def init_person(self) -> None:
+        """
+        This method modifies the attributes of the person instance based on the model's
+        stats_tables as part of the initial setup of the model agents.
+        :return: None
+        """
+
         row = weighted_one_of(self.model.age_gender_dist, lambda x: x[-1],
                                     self.model.random)  # select a row from our age_gender distribution
         self.birth_tick = 0 - row[0] * self.model.ticks_per_year
@@ -48,9 +62,7 @@ class Person(mesa.Agent):
             self.education_level = pick_from_pair_list(self.model.edu[self.gender_is_male], self.model.random)
             
         self.propensity = self.model.lognormal(self.model.nat_propensity_m, self.model.nat_propensity_sigma)
-        self.job_level = 0
-        self.wealth_level = 0 # job e wealth level le mettiamo con un'altra funzione ma è bene ricordarci che sono variabili dell'agente
-        self.num_co_offenses = {}
+
 
 
     def step(self):
@@ -208,9 +220,10 @@ class Person(mesa.Agent):
         self.number_of_children += 1
         self.model.number_born += 1
         index = len(self.model.agents) + 1
+        
         new_agent = Person(index, self.model)
-        new_agent.age = 0
         self.model.schedule.add(new_agent)
+        new_agent.age = 0
         new_agent.wealth_level = self.wealth_level
         new_agent.birth_tick = self.model.tick
         new_agent.wealth_level = self.wealth_level
@@ -235,7 +248,7 @@ class Person(mesa.Agent):
         
         new_agent.ticks = 0
 
-        new_agent.education_level = 1.0
+        new_agent.education_level = 1
         new_agent.gender_is_male = self.model.random.choice([True, False])  # True male False female
 
         new_agent.propensity = self.model.lognormal(self.model.nat_propensity_m, self.model.nat_propensity_sigma)
@@ -246,3 +259,194 @@ class Person(mesa.Agent):
     def break_friendship_link(self, asker):
         self.neighbors.get("friendship").remove(asker)
         asker.neighbors.get("friendship").remove(self)
+
+
+    def get_caught(self) -> None:
+        """
+        When an agent is caught during a crime and goes to prison, this procedure is activated.
+        :return: None
+        """
+        self.model.number_law_interventions_this_tick += 1
+        self.model.people_jailed += 1
+        self.prisoner = True
+        if self.gender_is_male:
+            self.sentence_countdown = pick_from_pair_list(self.model.male_punishment_length, self.model.random)
+        else:
+            self.sentence_countdown = pick_from_pair_list(self.model.female_punishment_length, self.model.random)
+        self.sentence_countdown = self.sentence_countdown * self.model.punishment_length
+        if self.job_level:
+            self.job_level = 1
+        # lose some friends?
+        # we keep the friendship links and the family links
+
+    def find_accomplices(self, n_of_accomplices: int):
+        """
+        This method is used to find accomplices during commit_crimes procedure
+        :param n_of_accomplices: int, number of accomplices
+        :return: List[Person]
+        """
+        if n_of_accomplices == 0:
+            return [self]
+        else:
+            d = 1  # start with a network distance of 1
+            accomplices = set()
+            while len(accomplices) < n_of_accomplices and d <= self.model.max_accomplice_radius:
+                # first create the group
+                candidates = sorted(self.agents_in_radius(d), key=lambda x: self.candidates_weight(x))
+                while len(accomplices) < n_of_accomplices and len(candidates) > 0:
+                    candidate = candidates[0]
+                    candidates.remove(candidate)
+                    accomplices.add(candidate)
+                    # todo: Should be if candidate.facilitator and facilitator_needed? tracked issue #234
+                d += 1
+            if len(accomplices) < n_of_accomplices:
+                self.model.crime_size_fails += 1
+            accomplices.add(self)
+        return list(accomplices)
+    
+    
+    def _agents_in_radius(self, context = network_names):
+        """
+        It finds the agents distant 1 in the specified networks, by default it finds it on all networks.
+        :param context: List[str], limit to networks name
+        :return: Set[Person]
+        """
+        agents_in_radius = set()
+        for net in context:
+            if self.neighbors.get(net):
+                for agent in self.neighbors.get(net):
+                    agents_in_radius.add(agent)
+        return agents_in_radius
+
+    def agents_in_radius(self, d: int, context = network_names):
+        """
+        It finds the agents distant "d" in the specified networks "context", by default it finds it on all networks.
+        :param d: int, the distance
+        :param context: List[str], limit to networks name
+        :return: Set[Person]
+        """
+        # todo: This function must be speeded up, radius(3) on all agents with 1000 initial agents, t = 1.05 sec
+        # todo: This function can be unified to neighbors_range
+        radius = self._agents_in_radius(context)
+        if d == 1:
+            return radius
+        else:
+            for di in range(d - 1):
+                for agent_in_radius in radius:
+                    radius = radius.union(agent_in_radius._agents_in_radius(context))
+            if self in radius:
+                radius.remove(self)
+            return radius
+        
+    def candidates_weight(self, agent) -> float:
+        """
+        This is what in the paper is called r - this is r R is then operationalised as the proportion
+        of OC members among the social relations of each individual (comprising family, friendship, school,
+        working and co-offending relations)
+        :param agent: Person
+        :return: float, the candidates weight
+        """
+        return -1 * (self.social_proximity(agent) * agent.oc_embeddedness() *
+                     agent.criminal_tendency) if self.oc_member \
+            else (self.social_proximity(agent) * agent.criminal_tendency)
+
+    def social_proximity(self, target) -> int:
+        """
+        This function calculates the social proximity between self and another agent based on age,
+        gender, wealth level, education level and friendship
+        :param target: Person
+        :return: int, social proximity
+        """
+        #todo: add weight? we could create a global model attribute(a dict) with weights
+        total = 0
+        total += 0 if abs(target.age - self.age) > 18 else 1 - abs(target.age - self.age)/18
+        total += 1 if self.gender_is_male == target.gender_is_male else 0
+        total += 1 if self.wealth_level == target.wealth_level else 0
+        total += 1 if self.education_level == target.education_level else 0
+        total += 1 if self.neighbors.get("friendship").intersection(
+            target.neighbors.get("friendship")) else 0
+        return total
+
+    def n_links(self):
+        result = 0
+        for net in self.network_names:
+            result += len(self.neighbors.get(net))
+        return result
+    
+    def oc_embeddedness(self) -> float:
+        """
+        Calculates the cached_oc_embeddedness of self.
+        :return: float, the cached_oc_embeddedness
+        """
+        if self.cached_oc_embeddedness is None:
+            # only calculate oc-embeddedness if we don't have a cached value
+            self.cached_oc_embeddedness = 0
+            # start with an hypothesis of 0
+            agents = self.agents_in_radius(self.model.oc_embeddedness_radius)
+            oc_members = [agent for agent in agents if agent.oc_member]
+            # this needs to include the caller
+            agents.add(self)
+            if oc_members:
+                self.model.update_meta_links(agents)
+                self.cached_oc_embeddedness = self.find_oc_weight_distance(oc_members) / self.find_oc_weight_distance(
+                    agents)
+        return self.cached_oc_embeddedness
+
+    def find_oc_weight_distance(self, agents) -> float:
+        """
+        Based on the graph self.model.meta_graph calculates the weighted distance of self from each agent passed to the agents parameter
+        :param agents: Union[Set[Person], List[Person]]
+        :return: float, the distance
+        """
+        if self in agents:
+            agents.remove(self)
+        distance = 0
+        for agent in agents:
+            distance += 1 / nx.algorithms.shortest_paths.weighted.dijkstra_path_length(self.model.meta_graph,
+                                                                                       self.unique_id, agent.unique_id,
+                                                                                       weight='weight')
+        return distance
+    
+    def update_criminal_tendency(self) -> None:
+        """
+        This procedure modifies the attribute self.criminal_tendency in-place, based on the individual characteristics of the agent.
+        The original nomenclature of the model in Netlogo is: [employment, education, propensity, crim-hist, crim-fam, crim-neigh, oc-member]
+        More information on criminal tendency modeling can be found on PROTON-Simulator-Report, page 30, 2.3.2 MODELLING CRIMINAL ACTIVITY (C):
+        [https://www.projectproton.eu/wp-content/uploads/2019/10/D5.1-PROTON-Simulator-Report.pdf]
+        :return: None
+        """
+        # employment
+        self.criminal_tendency *= 1.30 if self.job_level == 1 else 1.0
+        # education
+        self.criminal_tendency *= 0.94 if self.education_level >= 2 else 1.0
+        # propensity
+        self.criminal_tendency *= 1.97 if self.propensity > (np.exp(
+            self.model.nat_propensity_m - self.model.nat_propensity_sigma ** 2 / 2) + self.model.nat_propensity_threshold * np.sqrt(
+            np.exp(self.model.nat_propensity_sigma) ** 2 - 1) * np.exp(
+            self.model.nat_propensity_m + self.model.nat_propensity_sigma ** 2 / 2)) else 1.0
+        # crim-hist
+        self.criminal_tendency *= 1.62 if self.num_crimes_committed >= 0 else 1.0
+        # crim-fam
+        self.criminal_tendency *= 1.45 if self.family_link_neighbors() and (
+                len([agent for agent in self.family_link_neighbors() if agent.num_crimes_committed > 0]) /
+                len(self.family_link_neighbors())) > 0.5 else 1.0
+        # crim-neigh
+        friendship_neighbors = self.get_neighbor_list("friendship")
+
+        # Calculate the proportion of friends who have committed crimes
+        if friendship_neighbors:
+            num_criminal_friends = len([agent for agent in friendship_neighbors if agent.num_crimes_committed > 0])
+            proportion_criminal_friends = num_criminal_friends / len(friendship_neighbors)
+        else:
+            proportion_criminal_friends = 0
+
+        # Update criminal tendency if more than 50% of friends have committed crimes
+        self.criminal_tendency *= 1.81 if proportion_criminal_friends > 0.5 else 1.0
+
+    def family_link_neighbors(self):
+            """
+            This function returns a list of all agents that have sibling,offspring,partner type connection with the agent.
+            :return: List[Person], the agents
+            """
+            return self.get_neighbor_list("sibling") + self.get_neighbor_list("offspring") + self.get_neighbor_list(
+                "partner")

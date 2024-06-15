@@ -196,14 +196,14 @@ if __name__ == "__main__":
     if local:
         current_directory = os.path.dirname(os.path.abspath(__file__))
     start_time = time.time()
-    m = CrimeModel(1000, current_directory = current_directory)
+    m = CrimeModel(500, current_directory = current_directory)
     print("--- %s seconds --- (To calculate)" % (time.time() - start_time))
     print_report(m, current_directory, "1", True)
-    #show_graphs(m)
     j = 0
     for i in range(360):
         m.step()
         if i % 72 == 0:
             j+=1
             print_report(m, current_directory, str(j), True)
+    show_graphs(m)
     

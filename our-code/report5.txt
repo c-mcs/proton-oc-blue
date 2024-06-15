@@ -1,653 +1,319 @@
 Family:
-  Member ID: 818, Age: 52.0, Sex: Male, Role: Child
-  Member ID: 654, Age: 64.0, Sex: Female, Role: Child
+  Member ID: 173, Age: 71.0, Sex: Female, Role: Child
 
 --------------------------------------------------
 
 Family:
-  Member ID: 408, Age: 51.0, Sex: Female, Role: Child
+  Member ID: 286, Age: 68.0, Sex: Female, Role: Partner
+  Member ID: 177, Age: 37.0, Sex: Female, Role: Child
+  Member ID: 424, Age: 36.0, Sex: Female, Role: Child
 
 --------------------------------------------------
 
 Family:
-  Member ID: 133, Age: 59.0, Sex: Male, Role: Child
+  Member ID: 308, Age: 55.0, Sex: Female, Role: Child
+  Member ID: 181, Age: 48.0, Sex: Female, Role: Child
 
 --------------------------------------------------
 
 Family:
-  Member ID: 710, Age: 51.0, Sex: Female, Role: Child
-  Member ID: 49, Age: 49.0, Sex: Male, Role: Child
+  Member ID: 33, Age: 54.0, Sex: Female, Role: Child
+  Member ID: 256, Age: 52.0, Sex: Female, Role: Child
+  Member ID: 97, Age: 54.0, Sex: Female, Role: Child
 
 --------------------------------------------------
 
 Family:
-  Member ID: 746, Age: 43.0, Sex: Male, Role: Child
-  Member ID: 553, Age: 49.0, Sex: Male, Role: Child
-  Member ID: 325, Age: 48.0, Sex: Female, Role: Child
+  Member ID: 137, Age: 79.0, Sex: Female, Role: Partner
+  Member ID: 404, Age: 44.0, Sex: Female, Role: Child
+  Member ID: 350, Age: 52.0, Sex: Female, Role: Child
+  Member ID: 303, Age: 53.0, Sex: Female, Role: Child
 
 --------------------------------------------------
 
-Family:
-  Member ID: 508, Age: 68.0, Sex: Male, Role: Head
-  Member ID: 206, Age: 63.0, Sex: Female, Role: Partner
-  Member ID: 113, Age: 33.0, Sex: Male, Role: Child
-  Member ID: 694, Age: 38.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 605, Age: 60.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 635, Age: 58.0, Sex: Female, Role: Partner
-  Member ID: 980, Age: 34.0, Sex: Male, Role: Child
-  Member ID: 986, Age: 39.0, Sex: Male, Role: Child
-  Member ID: 979, Age: 42.0, Sex: Male, Role: Child
-  Member ID: 363, Age: 33.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 955, Age: 56.0, Sex: Male, Role: Child
-  Member ID: 21, Age: 56.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 129, Age: 61.0, Sex: Male, Role: Head
-  Member ID: 303, Age: 53.0, Sex: Female, Role: Partner
-  Member ID: 48, Age: 26.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 127, Age: 53.0, Sex: Male, Role: Head
-  Member ID: 717, Age: 26.0, Sex: Female, Role: Child
-  Member ID: 120, Age: 24.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 617, Age: 34.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 426, Age: 62.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 837, Age: 52.0, Sex: Female, Role: Partner
-  Member ID: 278, Age: 25.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 699, Age: 42.0, Sex: Female, Role: Child
-  Member ID: 388, Age: 53.0, Sex: Male, Role: Child
-  Member ID: 527, Age: 51.0, Sex: Female, Role: Child
-
---------------------------------------------------
-
-Family:
-  Member ID: 319, Age: 49.0, Sex: Male, Role: Child
-
---------------------------------------------------
-
-Agent ID: 1252, Age: 5, Sex: Female, Education: 1.0, Work Status: 0
+Agent ID: 181, Age: 48.0, Sex: Female, Education: 3.0, Work Status: 1.0
 Friends:
-  Friend ID: 3, Age: 8.0, Sex: Male, Education: 1.0, Work Status: 0
-  Friend ID: 1217, Age: 7, Sex: Female, Education: 1.0, Work Status: 0
+  Friend ID: 319, Age: 49.0, Sex: Male, Education: 2.0, Work Status: 2.0
 
 --------------------------------------------------
 
-Agent ID: 0, Age: 66.0, Sex: Male, Education: 4.0, Work Status: 0
+Agent ID: 2, Age: 59.0, Sex: Female, Education: 4.0, Work Status: 0
+Friends:
+  Friend ID: 34, Age: 57.0, Sex: Female, Education: 3.0, Work Status: 1.0
+  Friend ID: 26, Age: 60.0, Sex: Female, Education: 4.0, Work Status: 3.0
+  Friend ID: 62, Age: 61.0, Sex: Male, Education: 4.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 3, Age: 30.0, Sex: Female, Education: 4.0, Work Status: 0
 Friends:
 
 --------------------------------------------------
 
-Agent ID: 152, Age: 40.0, Sex: Female, Education: 2.0, Work Status: 1.0
+Agent ID: 404, Age: 44.0, Sex: Female, Education: 3.0, Work Status: 1.0
 Friends:
-  Friend ID: 966, Age: 40.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 0, Age: 42.0, Sex: Female, Education: 3.0, Work Status: 0
 
 --------------------------------------------------
 
-Agent ID: 994, Age: 47.0, Sex: Male, Education: 2.0, Work Status: 2.0
+Agent ID: 158, Age: 54.0, Sex: Male, Education: 3.0, Work Status: 1
 Friends:
-  Friend ID: 336, Age: 49.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 257, Age: 47.0, Sex: Female, Education: 4.0, Work Status: 3.0
+  Friend ID: 86, Age: 49.0, Sex: Female, Education: 2.0, Work Status: 1.0
+  Friend ID: 495, Age: 52.0, Sex: Female, Education: 2.0, Work Status: 1.0
+  Friend ID: 209, Age: 54.0, Sex: Male, Education: 2.0, Work Status: 2.0
+  Friend ID: 333, Age: 61.0, Sex: Male, Education: 2.0, Work Status: 1.0
+  Friend ID: 127, Age: 53.0, Sex: Male, Education: 2.0, Work Status: 1.0
 
 --------------------------------------------------
 
-Agent ID: 24, Age: 25.0, Sex: Female, Education: 1.0, Work Status: 1.0
+Agent ID: 11, Age: 52.0, Sex: Female, Education: 4.0, Work Status: 1.0
 Friends:
+  Friend ID: 65, Age: 53.0, Sex: Female, Education: 2.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 458, Age: 24.0, Sex: Male, Education: 1.0, Work Status: 1.0
+Friends:
+  Friend ID: 120, Age: 24.0, Sex: Female, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 336, Age: 49.0, Sex: Female, Education: 2.0, Work Status: 1.0
+Friends:
+  Friend ID: 243, Age: 76.0, Sex: Male, Education: 3.0, Work Status: 1.0
+  Friend ID: 3, Age: 55.0, Sex: Female, Education: 4.0, Work Status: 0
+  Friend ID: 310, Age: 51.0, Sex: Male, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 234, Age: 38.0, Sex: Female, Education: 2.0, Work Status: 1.0
+Friends:
+  Friend ID: 193, Age: 38.0, Sex: Male, Education: 1.0, Work Status: 1
+  Friend ID: 177, Age: 37.0, Sex: Female, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 475, Age: 40.0, Sex: Male, Education: 2.0, Work Status: 1
+Friends:
+  Friend ID: 180, Age: 36.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 107, Age: 41.0, Sex: Female, Education: 2.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 1, Age: 54.0, Sex: Female, Education: 4.0, Work Status: 0
+Friends:
+  Friend ID: 381, Age: 54.0, Sex: Female, Education: 3.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 120, Age: 24.0, Sex: Female, Education: 1.0, Work Status: 1.0
+Friends:
+  Friend ID: 233, Age: 25.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 458, Age: 24.0, Sex: Male, Education: 1.0, Work Status: 1.0
+  Friend ID: 82, Age: 28.0, Sex: Male, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 111, Age: 24.0, Sex: Male, Education: 1.0, Work Status: 1.0
+Friends:
+  Friend ID: 1, Age: 43.0, Sex: Male, Education: 3.0, Work Status: 0
   Friend ID: 461, Age: 24.0, Sex: Male, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 59, Age: 29.0, Sex: Female, Education: 1.0, Work Status: 1.0
+Friends:
+  Friend ID: 332, Age: 33.0, Sex: Male, Education: 1.0, Work Status: 1.0
+  Friend ID: 47, Age: 29.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 60, Age: 27.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 327, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 280, Age: 25.0, Sex: Male, Education: 1.0, Work Status: 1.0
+  Friend ID: 119, Age: 27.0, Sex: Female, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 432, Age: 63.0, Sex: Female, Education: 4.0, Work Status: 3.0
+Friends:
+  Friend ID: 145, Age: 62.0, Sex: Female, Education: 3.0, Work Status: 1.0
+  Friend ID: 190, Age: 56.0, Sex: Male, Education: 3.0, Work Status: 1.0
+  Friend ID: 416, Age: 65.0, Sex: Male, Education: 2.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 284, Age: 64.0, Sex: Female, Education: 2.0, Work Status: 1.0
+Friends:
+  Friend ID: 317, Age: 64.0, Sex: Male, Education: 3.0, Work Status: 1.0
+  Friend ID: 469, Age: 64.0, Sex: Male, Education: 2.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 486, Age: 51.0, Sex: Male, Education: 3.0, Work Status: 1
+Friends:
+  Friend ID: 466, Age: 54.0, Sex: Male, Education: 3.0, Work Status: 1
+  Friend ID: 3, Age: 55.0, Sex: Female, Education: 4.0, Work Status: 0
+  Friend ID: 39, Age: 48.0, Sex: Male, Education: 2.0, Work Status: 1
+  Friend ID: 103, Age: 54.0, Sex: Male, Education: 2.0, Work Status: 2.0
+  Friend ID: 401, Age: 51.0, Sex: Male, Education: 2.0, Work Status: 1
+
+--------------------------------------------------
+
+Agent ID: 3, Age: 82.0, Sex: Male, Education: 2.0, Work Status: 0
+Friends:
+
+--------------------------------------------------
+
+Agent ID: 4, Age: 53.0, Sex: Female, Education: 3.0, Work Status: 0
+Friends:
   Friend ID: 278, Age: 25.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 386, Age: 25.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 397, Age: 25.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 833, Age: 24.0, Sex: Female, Education: 1.0, Work Status: 1.0
 
 --------------------------------------------------
 
-Agent ID: 394, Age: 59.0, Sex: Female, Education: 2.0, Work Status: 1.0
+Agent ID: 99, Age: 60.0, Sex: Female, Education: 3.0, Work Status: 1.0
 Friends:
-  Friend ID: 6, Age: 52.0, Sex: Male, Education: 3.0, Work Status: 0
-  Friend ID: 322, Age: 59.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 17, Age: 62.0, Sex: Female, Education: 4.0, Work Status: 1.0
+  Friend ID: 26, Age: 60.0, Sex: Female, Education: 4.0, Work Status: 3.0
+  Friend ID: 2, Age: 57.0, Sex: Female, Education: 3.0, Work Status: 0
+  Friend ID: 43, Age: 60.0, Sex: Male, Education: 2.0, Work Status: 2.0
 
 --------------------------------------------------
 
-Agent ID: 7, Age: 37.0, Sex: Female, Education: 3.0, Work Status: 0
+Agent ID: 461, Age: 24.0, Sex: Male, Education: 1.0, Work Status: 1.0
+Friends:
+  Friend ID: 111, Age: 24.0, Sex: Male, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 209, Age: 54.0, Sex: Male, Education: 2.0, Work Status: 2.0
+Friends:
+  Friend ID: 58, Age: 55.0, Sex: Female, Education: 2.0, Work Status: 1.0
+  Friend ID: 31, Age: 56.0, Sex: Male, Education: 2.0, Work Status: 2.0
+  Friend ID: 155, Age: 54.0, Sex: Male, Education: 4.0, Work Status: 1
+  Friend ID: 158, Age: 54.0, Sex: Male, Education: 3.0, Work Status: 1
+  Friend ID: 467, Age: 58.0, Sex: Female, Education: 2.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 501, Age: 23, Sex: Female, Education: 1, Work Status: 0
+Friends:
+  Friend ID: 519, Age: 20, Sex: Female, Education: 1, Work Status: 0
+
+--------------------------------------------------
+
+Agent ID: 196, Age: 28.0, Sex: Female, Education: 1.0, Work Status: 1.0
 Friends:
 
 --------------------------------------------------
 
-Agent ID: 6, Age: 71.0, Sex: Female, Education: 2.0, Work Status: 0
+Agent ID: 4, Age: 67.0, Sex: Female, Education: 3.0, Work Status: 0
 Friends:
-  Friend ID: 3, Age: 67.0, Sex: Female, Education: 2.0, Work Status: 0
-  Friend ID: 786, Age: 73.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 846, Age: 48.0, Sex: Male, Education: 2.0, Work Status: 2.0
+
+--------------------------------------------------
+
+Agent ID: 620, Age: 4, Sex: Female, Education: 1, Work Status: 0
+Friends:
+  Friend ID: 628, Age: 3, Sex: Female, Education: 1, Work Status: 0
+
+--------------------------------------------------
+
+Agent ID: 195, Age: 34.0, Sex: Female, Education: 1.0, Work Status: 1.0
+Friends:
+  Friend ID: 290, Age: 33.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 463, Age: 39.0, Sex: Female, Education: 2.0, Work Status: 1.0
+  Friend ID: 74, Age: 31.0, Sex: Male, Education: 1.0, Work Status: 1.0
+
+--------------------------------------------------
+
+Agent ID: 520, Age: 20, Sex: Female, Education: 1, Work Status: 0
+Friends:
+  Friend ID: 519, Age: 20, Sex: Female, Education: 1, Work Status: 0
 
 --------------------------------------------------
 
 Agent ID: 190, Age: 56.0, Sex: Male, Education: 3.0, Work Status: 1.0
 Friends:
-  Friend ID: 654, Age: 64.0, Sex: Female, Education: 2.0, Work Status: 1.0
+  Friend ID: 432, Age: 63.0, Sex: Female, Education: 4.0, Work Status: 3.0
 
 --------------------------------------------------
 
-Agent ID: 697, Age: 34.0, Sex: Female, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 611, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 195, Age: 34.0, Sex: Female, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 1020, Age: 22, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 1019, Age: 22, Sex: Female, Education: 1.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 622, Age: 81.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 609, Age: 62.0, Sex: Male, Education: 2.0, Work Status: 2.0
-  Friend ID: 126, Age: 79.0, Sex: Female, Education: 4.0, Work Status: 3.0
-  Friend ID: 62, Age: 61.0, Sex: Male, Education: 4.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 4, Age: 26.0, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 4, Age: 26.0, Sex: Female, Education: 1.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 9, Age: 61.0, Sex: Male, Education: 1.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 304, Age: 48.0, Sex: Female, Education: 3.0, Work Status: 1.0
-Friends:
-  Friend ID: 597, Age: 48.0, Sex: Female, Education: 3.0, Work Status: 2.0
-  Friend ID: 654, Age: 64.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 545, Age: 37.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 8, Age: 46.0, Sex: Male, Education: 2.0, Work Status: 0
-  Friend ID: 5, Age: 43.0, Sex: Female, Education: 3.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 678, Age: 72.0, Sex: Female, Education: 3.0, Work Status: 2.0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 393, Age: 45.0, Sex: Female, Education: 3.0, Work Status: 1.0
-Friends:
-  Friend ID: 741, Age: 45.0, Sex: Male, Education: 2.0, Work Status: 2.0
-  Friend ID: 664, Age: 57.0, Sex: Female, Education: 4.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 1307, Age: 0, Sex: Male, Education: 1.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 45, Age: 74.0, Sex: Female, Education: 4.0, Work Status: 4.0
-Friends:
-  Friend ID: 623, Age: 74.0, Sex: Female, Education: 4.0, Work Status: 1.0
-  Friend ID: 850, Age: 73.0, Sex: Female, Education: 3.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 748, Age: 42.0, Sex: Male, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 284, Age: 64.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 746, Age: 43.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 625, Age: 52.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 936, Age: 57.0, Sex: Female, Education: 3.0, Work Status: 2.0
-
---------------------------------------------------
-
-Agent ID: 1306, Age: 0, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 720, Age: 47.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 327, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 718, Age: 38.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 682, Age: 47.0, Sex: Male, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 5, Age: 43.0, Sex: Female, Education: 3.0, Work Status: 0
-Friends:
-  Friend ID: 304, Age: 48.0, Sex: Female, Education: 3.0, Work Status: 1.0
-  Friend ID: 193, Age: 38.0, Sex: Male, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 2, Age: 62.0, Sex: Female, Education: 4.0, Work Status: 0
-Friends:
-  Friend ID: 1, Age: 62.0, Sex: Female, Education: 4.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 6, Age: 52.0, Sex: Male, Education: 3.0, Work Status: 0
-Friends:
-  Friend ID: 4, Age: 63.0, Sex: Female, Education: 2.0, Work Status: 0
-  Friend ID: 394, Age: 59.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 352, Age: 71.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 668, Age: 62.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 727, Age: 62.0, Sex: Female, Education: 3.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 3, Age: 57.0, Sex: Female, Education: 4.0, Work Status: 0
-Friends:
-  Friend ID: 479, Age: 44.0, Sex: Female, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 110, Age: 62.0, Sex: Male, Education: 2.0, Work Status: 2.0
-Friends:
-  Friend ID: 21, Age: 56.0, Sex: Female, Education: 3.0, Work Status: 1.0
-  Friend ID: 680, Age: 46.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 1241, Age: 5, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 442, Age: 27.0, Sex: Male, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 467, Age: 58.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 800, Age: 31.0, Sex: Male, Education: 1.0, Work Status: 1.0
+Agent ID: 363, Age: 33.0, Sex: Female, Education: 1.0, Work Status: 1.0
 Friends:
   Friend ID: 447, Age: 31.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 671, Age: 32.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 194, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 823, Age: 30.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 957, Age: 30.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 419, Age: 27.0, Sex: Male, Education: 1.0, Work Status: 1.0
+  Friend ID: 429, Age: 33.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 290, Age: 33.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 424, Age: 36.0, Sex: Female, Education: 1.0, Work Status: 1.0
 
 --------------------------------------------------
 
-Agent ID: 4, Age: 50.0, Sex: Female, Education: 3.0, Work Status: 0
-Friends:
-  Friend ID: 903, Age: 48.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 962, Age: 46.0, Sex: Male, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 365, Age: 41.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 740, Age: 46.0, Sex: Male, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 892, Age: 24.0, Sex: Female, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 480, Age: 40.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 386, Age: 25.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 915, Age: 25.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 705, Age: 25.0, Sex: Male, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 860, Age: 53.0, Sex: Female, Education: 1.0, Work Status: 1.0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 1045, Age: 20, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 1021, Age: 22, Sex: Male, Education: 1.0, Work Status: 0
-  Friend ID: 1018, Age: 22, Sex: Male, Education: 1.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 191, Age: 54.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 820, Age: 57.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 765, Age: 54.0, Sex: Male, Education: 3.0, Work Status: 2.0
-  Friend ID: 927, Age: 69.0, Sex: Female, Education: 4.0, Work Status: 1.0
-  Friend ID: 139, Age: 56.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 0, Age: 76.0, Sex: Female, Education: 2.0, Work Status: 0
-  Friend ID: 65, Age: 53.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 34, Age: 57.0, Sex: Female, Education: 3.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 956, Age: 50.0, Sex: Male, Education: 2.0, Work Status: 2.0
-Friends:
-  Friend ID: 967, Age: 47.0, Sex: Male, Education: 2.0, Work Status: 2.0
-  Friend ID: 510, Age: 44.0, Sex: Male, Education: 3.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 1057, Age: 20, Sex: Male, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 1032, Age: 21, Sex: Female, Education: 1.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 746, Age: 43.0, Sex: Male, Education: 1.0, Work Status: 1.0
+Agent ID: 2, Age: 59.0, Sex: Female, Education: 2.0, Work Status: 0
 Friends:
   Friend ID: 164, Age: 43.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 477, Age: 69.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 748, Age: 42.0, Sex: Male, Education: 2.0, Work Status: 1.0
 
 --------------------------------------------------
 
-Agent ID: 193, Age: 38.0, Sex: Male, Education: 2.0, Work Status: 1.0
+Agent ID: 481, Age: 74.0, Sex: Female, Education: 3.0, Work Status: 1.0
 Friends:
-  Friend ID: 277, Age: 39.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 596, Age: 26.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 5, Age: 43.0, Sex: Female, Education: 3.0, Work Status: 0
+  Friend ID: 216, Age: 72.0, Sex: Female, Education: 2.0, Work Status: 1.0
 
 --------------------------------------------------
 
-Agent ID: 986, Age: 39.0, Sex: Male, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 510, Age: 44.0, Sex: Male, Education: 3.0, Work Status: 1.0
-  Friend ID: 649, Age: 39.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 745, Age: 39.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 86, Age: 49.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 234, Age: 38.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 944, Age: 41.0, Sex: Male, Education: 2.0, Work Status: 2.0
-Friends:
-  Friend ID: 718, Age: 38.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 707, Age: 41.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 392, Age: 59.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 470, Age: 47.0, Sex: Male, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 3, Age: 62.0, Sex: Male, Education: 3.0, Work Status: 0
+Agent ID: 1, Age: 37.0, Sex: Male, Education: 2.0, Work Status: 0
 Friends:
 
 --------------------------------------------------
 
-Agent ID: 51, Age: 52.0, Sex: Male, Education: 4.0, Work Status: 1.0
+Agent ID: 394, Age: 59.0, Sex: Female, Education: 2.0, Work Status: 1.0
 Friends:
-  Friend ID: 834, Age: 51.0, Sex: Female, Education: 3.0, Work Status: 2.0
+  Friend ID: 350, Age: 52.0, Sex: Female, Education: 3.0, Work Status: 1.0
 
 --------------------------------------------------
 
-Agent ID: 0, Age: 62.0, Sex: Male, Education: 2.0, Work Status: 0
+Agent ID: 73, Age: 35.0, Sex: Female, Education: 1.0, Work Status: 1.0
 Friends:
-  Friend ID: 6, Age: 62.0, Sex: Male, Education: 2.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 62, Age: 61.0, Sex: Male, Education: 4.0, Work Status: 1.0
-Friends:
-  Friend ID: 622, Age: 81.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 117, Age: 78.0, Sex: Female, Education: 4.0, Work Status: 3.0
-
---------------------------------------------------
-
-Agent ID: 0, Age: 23.0, Sex: Male, Education: 1.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 312, Age: 77.0, Sex: Male, Education: 4.0, Work Status: 1.0
-Friends:
-  Friend ID: 540, Age: 72.0, Sex: Male, Education: 4.0, Work Status: 1.0
-  Friend ID: 850, Age: 73.0, Sex: Female, Education: 3.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 998, Age: 27.0, Sex: Female, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 596, Age: 26.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 817, Age: 29.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 119, Age: 27.0, Sex: Female, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 526, Age: 52.0, Sex: Female, Education: 3.0, Work Status: 1.0
-Friends:
-  Friend ID: 943, Age: 52.0, Sex: Female, Education: 3.0, Work Status: 1.0
-  Friend ID: 129, Age: 61.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 675, Age: 42.0, Sex: Male, Education: 3.0, Work Status: 1.0
-  Friend ID: 883, Age: 52.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 150, Age: 41.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 533, Age: 52.0, Sex: Female, Education: 3.0, Work Status: 1.0
-  Friend ID: 920, Age: 52.0, Sex: Female, Education: 4.0, Work Status: 3.0
-
---------------------------------------------------
-
-Agent ID: 3, Age: 39.0, Sex: Female, Education: 4.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 549, Age: 55.0, Sex: Male, Education: 4.0, Work Status: 1.0
-Friends:
-  Friend ID: 408, Age: 51.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 301, Age: 66.0, Sex: Male, Education: 2.0, Work Status: 3.0
-Friends:
-  Friend ID: 979, Age: 42.0, Sex: Male, Education: 2.0, Work Status: 2.0
-  Friend ID: 416, Age: 65.0, Sex: Male, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 1139, Age: 13, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 1138, Age: 13, Sex: Male, Education: 1.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 670, Age: 41.0, Sex: Male, Education: 2.0, Work Status: 2.0
-Friends:
-  Friend ID: 175, Age: 41.0, Sex: Male, Education: 2.0, Work Status: 2.0
-  Friend ID: 707, Age: 41.0, Sex: Male, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 408, Age: 51.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 577, Age: 51.0, Sex: Male, Education: 3.0, Work Status: 1.0
-  Friend ID: 549, Age: 55.0, Sex: Male, Education: 4.0, Work Status: 1.0
-  Friend ID: 521, Age: 43.0, Sex: Female, Education: 2.0, Work Status: 1.0
-  Friend ID: 128, Age: 54.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 7, Age: 55.0, Sex: Female, Education: 3.0, Work Status: 0
-Friends:
-  Friend ID: 8, Age: 74.0, Sex: Female, Education: 3.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 841, Age: 55.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 209, Age: 54.0, Sex: Male, Education: 2.0, Work Status: 2.0
-  Friend ID: 234, Age: 38.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 754, Age: 29.0, Sex: Male, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 60, Age: 27.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 332, Age: 33.0, Sex: Male, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 8, Age: 62.0, Sex: Male, Education: 2.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 0, Age: 27.0, Sex: Male, Education: 2.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 1017, Age: 22, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 419, Age: 27.0, Sex: Male, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 1034, Age: 21, Sex: Male, Education: 1.0, Work Status: 0
-Friends:
-
---------------------------------------------------
-
-Agent ID: 1032, Age: 21, Sex: Female, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 1057, Age: 20, Sex: Male, Education: 1.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 4, Age: 35.0, Sex: Male, Education: 3.0, Work Status: 0
-Friends:
-  Friend ID: 980, Age: 34.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 5, Age: 34.0, Sex: Male, Education: 4.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 941, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 905, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 185, Age: 33.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 611, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 318, Age: 31.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 750, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 793, Age: 30.0, Sex: Female, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 822, Age: 31.0, Sex: Female, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 318, Age: 31.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 6, Age: 39.0, Sex: Male, Education: 4.0, Work Status: 0
-
---------------------------------------------------
-
-Agent ID: 104, Age: 40.0, Sex: Female, Education: 2.0, Work Status: 1.0
-Friends:
-  Friend ID: 114, Age: 40.0, Sex: Male, Education: 1.0, Work Status: 1.0
-  Friend ID: 852, Age: 39.0, Sex: Male, Education: 2.0, Work Status: 1.0
-  Friend ID: 635, Age: 58.0, Sex: Female, Education: 3.0, Work Status: 1.0
-  Friend ID: 3, Age: 39.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 463, Age: 39.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 1005, Age: 23, Sex: Male, Education: 1.0, Work Status: 0
-Friends:
-  Friend ID: 1019, Age: 22, Sex: Female, Education: 1.0, Work Status: 0
-  Friend ID: 582, Age: 27.0, Sex: Male, Education: 1.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 427, Age: 55.0, Sex: Female, Education: 4.0, Work Status: 3.0
-Friends:
-  Friend ID: 466, Age: 54.0, Sex: Male, Education: 3.0, Work Status: 1.0
-  Friend ID: 223, Age: 45.0, Sex: Female, Education: 2.0, Work Status: 1.0
-
---------------------------------------------------
-
-Agent ID: 503, Age: 34.0, Sex: Female, Education: 1.0, Work Status: 1.0
-Friends:
-  Friend ID: 970, Age: 34.0, Sex: Female, Education: 1.0, Work Status: 1.0
-  Friend ID: 85, Age: 43.0, Sex: Male, Education: 3.0, Work Status: 3.0
+  Friend ID: 376, Age: 38.0, Sex: Female, Education: 2.0, Work Status: 1.0
+  Friend ID: 424, Age: 36.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 327, Age: 32.0, Sex: Female, Education: 1.0, Work Status: 1.0
+  Friend ID: 214, Age: 34.0, Sex: Female, Education: 1.0, Work Status: 1.0
 
 --------------------------------------------------
 
 Average number of friends and average of average age of friends by age category and gender:
 Age Category | Gender | Avg. Friends | Avg. of Avg. Age of Friends
 ----------------------------------------------------------------------
-      0 - 14 | Male   |         1.58 |                   9.23
-      0 - 14 | Female |         1.60 |                   9.85
+      0 - 14 | Male   |         1.12 |                   8.38
+      0 - 14 | Female |         1.18 |                   6.91
 
 
-     15 - 29 | Male   |         2.55 |                  25.16
-     15 - 29 | Female |         2.81 |                  26.08
+     15 - 29 | Male   |         2.25 |                  27.66
+     15 - 29 | Female |         2.58 |                  26.20
 
 
-     30 - 44 | Male   |         2.84 |                  37.22
-     30 - 44 | Female |         3.07 |                  38.30
+     30 - 44 | Male   |         2.59 |                  38.89
+     30 - 44 | Female |         3.19 |                  38.47
 
 
-     45 - 59 | Male   |         2.36 |                  50.83
-     45 - 59 | Female |         2.25 |                  50.60
+     45 - 59 | Male   |         2.46 |                  53.02
+     45 - 59 | Female |         2.40 |                  52.08
 
 
-     60 - 74 | Male   |         1.72 |                  63.17
-     60 - 74 | Female |         1.92 |                  63.90
+     60 - 74 | Male   |         1.67 |                  61.73
+     60 - 74 | Female |         1.83 |                  61.09
 
 
-     75+     | Male   |         1.62 |                  67.81
-     75+     | Female |         1.50 |                  68.24
+     75+     | Male   |         1.17 |                  66.25
+     75+     | Female |         1.17 |                  60.58
 
 
 Percentual distribution of number of friends by gender:
 Number of Friends | Male (%) | Female (%)
 --------------------------------------------------
-          0       |   17.54  |    14.72
-          1       |   30.41  |    30.20
-          2       |   22.51  |    22.84
-          3       |   12.57  |    12.94
-          4       |    9.36  |     9.90
-          5       |    3.51  |     6.35
-          6       |    2.92  |     2.03
-          7       |    1.17  |     0.51
-          8       |    0.00  |     0.51
-Head: 746. Age: 43.0, Sex: True, Crime P: 3.689944442971064
-Member: 553. Age: 49.0, Sex: True, Crime P: 2.9745720959838238
-Member: 854. Age: 66.0, Sex: True, Crime P: 2.303974250541326
-Member: 414. Age: 59.0, Sex: False, Crime P: 2.548118871489718
+          0       |   16.03  |    13.57
+          1       |   37.18  |    35.18
+          2       |   18.59  |    20.10
+          3       |   16.03  |    13.07
+          4       |    4.49  |     7.54
+          5       |    5.13  |     3.52
+          6       |    1.92  |     6.03
+          7       |    0.00  |     1.01
+          8       |    0.64  |     0.00
+Head: 38. Age: 67.0, Sex: True, Crime P: 3.3636798429783537
+Member: 173. Age: 71.0, Sex: False, Crime P: 2.880872826078606
+Member: 413. Age: 78.0, Sex: True, Crime P: 2.2003981603372864
 

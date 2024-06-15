@@ -6,7 +6,7 @@ from protonoc.simulator.extra import list_contains_problems
 from Person import Person
 from extras import *
 import random
-from itertools import combinations
+from itertools import combinations, chain
 
 class CrimeModel(mesa.Model):
     def __init__(self, N, current_directory, model_params = {"no-params":"empty"}, agent_params = {"no-params":"empty"}):
@@ -20,6 +20,7 @@ class CrimeModel(mesa.Model):
         self.ticks_per_year = 12
         self.nat_propensity_m: float = 1.0  # 0.1 -> 10
         self.nat_propensity_sigma: float = 0.25  # 0.1 -> 10.0
+        self.nat_propensity_threshold: float = 1.0  # 0.1 -> 2.0
         self.education_modifier = 1.0
         self.parameters = model_params
         self.agent_params = agent_params
@@ -31,12 +32,24 @@ class CrimeModel(mesa.Model):
         self.retirement_age = 64
         self.friends_graph = nx.Graph()
         self.crime_communities_graph = nx.Graph()
+        self.meta_graph = nx.Graph()
         self.number_arrests_per_year: int = 30  # 0 -> 100
         self.number_crimes_yearly_per10k: int = 2000 
         self.arrest_rate = self.number_arrests_per_year / self.ticks_per_year / self.number_crimes_yearly_per10k / 10000 * self.initial_agents
         self.num_oc_persons: int = 30  # 2 -> 200
         self.num_oc_families: int = 8  # 1 -> 50
+        self.this_is_a_big_crime: int = 3
+        self.good_guy_threshold: float = 0.6
+        self.big_crime_from_small_fish: int = 0  # checking anomalous crimes
+        self.number_offspring_recruited_this_tick: int = 0
+        self.number_law_interventions_this_tick = 0
+        self.people_jailed = 0
+        self.number_crimes = 0
         self.number_born = 0
+        self.punishment_length: int = 1  # 0.5 -> 2
+        self.max_accomplice_radius: int = 2  # 2 -> 4
+        self.oc_embeddedness_radius: int = 2  # 1 -> 4
+        self.crime_size_fails = 0
 
         self.datacollector = mesa.datacollection.DataCollector(
             model_reporters={
@@ -56,25 +69,37 @@ class CrimeModel(mesa.Model):
         self.calculate_crime_multiplier()
         self.calculate_criminal_tendency()
         self.setup_oc_groups2()
-
         for agent in self.schedule.agents:
             if not agent.gender_is_male and agent.get_neighbor_list("offspring"):
                 agent.number_of_children = len(agent.get_neighbor_list("offspring"))
     
+        self.calculate_criminal_tendency()
+        self.calculate_crime_multiplier() 
+
     def step(self):
+        self.tick += 1
+        self.number_law_interventions_this_tick = 0 # TODO
+
         for agent in self.schedule.agents:
             agent.ticks += 1
+            agent.num_crimes_committed_this_tick = 0 # TODO
             if agent.ticks % 12 == 0:
                 agent.age += 1
-        self.tick += 1
-        self.make_people_die()
-        self.wedding()
-        self.make_baby()
-        self.retire_persons()
+
         if self.tick % 12 == 0:
+            self.calculate_criminal_tendency()
+            self.calculate_crime_multiplier() 
             self.update_education_wealth_job()
             self.update_friendships()
             self.add_immigrants()
+        
+        self.reset_oc_embeddedness()
+        self.commit_crimes()
+        self.make_baby()
+        self.retire_persons()
+        self.wedding()
+        self.make_people_die()
+
 
     def init_data_employed(self):
         self.age_gender_dist = read_csv_data("initial_age_gender_dist", self.current_directory).values.tolist()
@@ -93,8 +118,13 @@ class CrimeModel(mesa.Model):
         self.number_weddings_mean = marriage['mean_marriages'][0]
         self.number_weddings_sd = marriage['std_marriages'][0]
         self.fertility_table = df_to_dict(read_csv_data("initial_fertility_rates", self.current_directory), extra_depth=True)
-
-
+        self.punishment_length_data = read_csv_data("conviction_length", self.current_directory)
+        self.male_punishment_length = df_to_lists(
+            self.punishment_length_data[["months", "M"]], split_row=False)
+        self.female_punishment_length = df_to_lists(
+            self.punishment_length_data[["months", "F"]], split_row=False)
+        self.num_co_offenders_dist = df_to_lists(
+            read_csv_data("num_co_offenders_dist", self.current_directory), split_row=False)
     def cleanup_unfit_individuals(self):
         for a in self.schedule.agents:
             if a.family_role == None:
@@ -426,7 +456,7 @@ class CrimeModel(mesa.Model):
                 # c is the cell value. Now we calculate criminal-tendency with the factors.
                 for agent in subpop:
                     agent.criminal_tendency = c
-                    #agent.update_criminal_tendency() ! TODO
+                    agent.update_criminal_tendency()
                 # then derive the correction epsilon by solving
                 # $\sum_{i} ( c f_i + \epsilon ) = \sum_i c$
                 epsilon = c - np.mean([agent.criminal_tendency for agent in subpop])
@@ -770,5 +800,100 @@ class CrimeModel(mesa.Model):
     def add_immigrants(self):
         n_immigrants = int(self.initial_agents * 0.01)
         self.init_agents(n_immigrants)
-
             
+    def commit_crimes(self) -> None:
+        """
+        This procedure is central in the model, allowing agents to find accomplices and commit
+        crimes. Based on the table ProtonOC.c_range_by_age_and_sex, the number of crimes and the
+        subset of the agents who commit them is selected. For each crime a single agent is selected
+        and if necessary activates the procedure that allows the agent to find accomplices.
+        Criminal groups are append within the list co_offender_groups.
+
+        :return: None
+        """
+        co_offender_groups = list()
+        co_offender_started_by_oc = list()
+        for cell, value in self.c_range_by_age_and_sex:
+            people_in_cell = [agent for agent in self.schedule.agents if
+                              cell[1] <= agent.age <= value[0]
+                              and agent.gender_is_male == cell[0]]
+            target_n_of_crimes = \
+                value[1] * len(people_in_cell) / self.ticks_per_year * self.crime_multiplier
+            for _target in np.arange(np.round(target_n_of_crimes)):
+                self.number_crimes += 1
+                agent = weighted_one_of(people_in_cell,
+                                              lambda x: x.criminal_tendency,
+                                              self.random)
+                number_of_accomplices = self.number_of_accomplices()
+                accomplices = agent.find_accomplices(number_of_accomplices)
+                # this takes care of facilitators as well.
+                co_offender_groups.append(accomplices)
+                if agent.oc_member:
+                    co_offender_started_by_oc.append(accomplices)
+                # check for big crimes started from a normal guy
+                if len(accomplices) > self.this_is_a_big_crime \
+                        and agent.criminal_tendency < self.good_guy_threshold:
+                    self.big_crime_from_small_fish += 1
+        for co_offender_group in co_offender_groups:
+            commit_crime(co_offender_group)
+        for co_offenders_by_OC in co_offender_started_by_oc:
+            for agent in [agent for agent in co_offenders_by_OC if not agent.oc_member]:
+                agent.new_recruit = self.tick
+                agent.oc_member = True
+                if agent.father:
+                    if agent.father.oc_member:
+                        self.number_offspring_recruited_this_tick += 1
+        criminals = list(chain.from_iterable(co_offender_groups))
+        if criminals:
+            # no intervention active
+            for criminal in criminals:
+                criminal.arrest_weight = 1
+            arrest_mod = self.number_arrests_per_year / self.ticks_per_year / 10000 * len(self.schedule.agents)
+            target_n_of_arrest = np.floor(
+                arrest_mod + 1
+                if self.random.random() < (arrest_mod - np.floor(arrest_mod))
+                else 0)
+            for agent in weighted_n_of(target_n_of_arrest, criminals,
+                                             lambda x: x.arrest_weight, self.random):
+                agent.get_caught()
+
+    def number_of_accomplices(self) -> int:
+        """
+        Pick a group size from ProtonOC.num_co_offenders_dist distribution and substract one to get
+        the number of accomplices
+        :return: int
+        """
+        return pick_from_pair_list(self.num_co_offenders_dist, self.random) - 1
+    
+    def update_meta_links(self, agents) -> None:
+        """
+        This method creates a new temporary graph that is used to colculate the
+        oc_embeddedness of an agent.
+
+        :param agents: Set[Person], the agentset
+        :return: None
+        """
+        self.meta_graph = nx.Graph(seed=self.random_state)
+        for agent in agents:
+            self.meta_graph.add_node(agent.unique_id)
+            for in_radius_agent in agent.agents_in_radius(
+                    1):  # limit the context to the agents in the radius of interest
+                self.meta_graph.add_node(in_radius_agent.unique_id)
+                w = 0
+                for net in Person.network_names:
+                    if in_radius_agent in agent.neighbors.get(net):
+                        if net == "criminal":
+                            if in_radius_agent in agent.num_co_offenses:
+                                w += agent.num_co_offenses[in_radius_agent]
+                        else:
+                            w += 1
+                self.meta_graph.add_edge(agent.unique_id, in_radius_agent.unique_id, weight=1 / w)
+
+    def reset_oc_embeddedness(self) -> None:
+        """
+        Reset the Person.cached_oc_embeddedness of all agents, this procedure is activated every
+        tick before committing crimes.
+        :return: None
+        """
+        for agent in self.schedule.agents:
+            agent.cached_oc_embeddedness = None
