@@ -278,6 +278,7 @@ class Person(mesa.Agent):
             self.job_level = 1
         # lose some friends?
         # we keep the friendship links and the family links
+        # todo
 
     def find_accomplices(self, n_of_accomplices: int):
         """

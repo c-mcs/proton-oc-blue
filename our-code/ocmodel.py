@@ -464,74 +464,6 @@ class CrimeModel(mesa.Model):
         #if self.intervention_is_on() and self.facilitator_repression:
             #self.calc_correction_for_non_facilitators() # Possibilità di inserire qui una policy
     
-    
-    def setup_oc_groups(self) -> None:
-        """
-        This procedure creates "criminal" type links within the families, based on the criminal
-        tendency of the agents, in case the agents within the families are not enough, new members
-        are taken outside.
-        :return: None
-        """
-        # OC members are scaled down if we don't have 10K agents
-        scaled_num_oc_families = np.ceil(
-            self.num_oc_families * self.initial_agents / 10000 * self.num_oc_persons / 30)
-        scaled_num_oc_persons = np.ceil(
-            self.num_oc_persons * self.initial_agents / 10000)
-        members_per_family = int(scaled_num_oc_persons / scaled_num_oc_families)
-        # families first.
-        # we assume here that we'll never get a negative criminal tendency.
-        oc_family_heads = weighted_n_of(scaled_num_oc_families, self.schedule.agents,
-                                              lambda x: x.criminal_tendency, self.random)
-        candidates = list()
-        cosca = set()
-        graphs = []
-        for head in oc_family_heads:
-            head.oc_member = True
-            head.oc_role = "boss"
-            self.mafia_heads.add(head)
-            candidates += [relative for relative in head.get_all_relatives() if
-                           relative.age >= 18]
-            if len(candidates) >= members_per_family:  # family members will be enough
-                members_in_families = weighted_n_of(members_per_family,
-                                                        candidates,
-                                                        lambda x: x.criminal_tendency,
-                                                        self.random)
-                # fill up the families as much as possible
-                for member in members_in_families:
-                    member.oc_member = True
-                    member.oc_role = "soldier"
-                    cosca.add(member)
-            else:
-                while members_per_family - len(cosca) > 0:
-                    for candidate in candidates:
-                        candidate.oc_member = True
-                        candidate.oc_role = "soldier"
-                        cosca.add(candidate)
-                    break
-                if members_per_family - len(cosca) > 0:
-                    missing_n = members_per_family - len(cosca) 
-                    for el in cosca:
-                        out_of_family_candidates += [agent for agent in el.get_all_relatives()
-                                                        if not agent.oc_member and agent.age >= 18]
-                    out_of_family_candidates = weighted_n_of(
-                        missing_n,
-                        out_of_family_candidates, lambda x: x.criminal_tendency, self.random)
-                    for out_of_family_candidate in out_of_family_candidates:
-                        out_of_family_candidate.oc_member = True
-                        out_of_family_candidate.oc_role = "soldier"
-                        cosca.add(candidate)
-            head.oc_subordinates = cosca
-            cosca_graph = nx.Graph()
-            cosca_graph.add_node(head)
-            for cosca_member in cosca:
-                cosca_graph.add_node(cosca_member)
-                cosca_graph.add_edge(head, cosca_member)
-            graphs.append(cosca_graph)
-        # creiamo i nodi del grafo
-        self.crime_communities_graph = nx.compose_all(graphs)
-        for node1, node2 in combinations(self.mafia_heads, 2):
-            self.crime_communities_graph.add_edge(node1, node2)
-    
     def setup_oc_groups2(self) -> None:
         """
         This procedure creates "criminal" type links within the families, based on the criminal
@@ -573,12 +505,17 @@ class CrimeModel(mesa.Model):
                                         if not agent.oc_member and agent.age >= 18]
                 out_of_family_candidates = weighted_n_of(missing_n, out_of_family_candidates, lambda x: x.criminal_tendency, self.random)
                 cosca.update(self.assign_additional_members(out_of_family_candidates, cosca, head, fill = True))
-            head.oc_subordinates = cosca
+            
             cosca_graph = nx.Graph()
-            cosca_graph.add_node(head)
             for cosca_member in cosca:
+                cosca_member.oc_member = True
+                cosca_member.oc_role = "soldier"
+                cosca_member.oc_boss = head
                 cosca_graph.add_node(cosca_member)
                 cosca_graph.add_edge(head, cosca_member)
+            
+            head.oc_subordinates = cosca
+            cosca_graph.add_node(head)
             graphs.append(cosca_graph)
 
         self.crime_communities_graph = nx.compose_all(graphs)
@@ -598,9 +535,6 @@ class CrimeModel(mesa.Model):
         members_in_families = weighted_n_of(min(members_per_family, len(candidates)), candidates, lambda x: x.criminal_tendency, self.random)
         for member in members_in_families:
             if member != head:  # Ensure head is not included
-                member.oc_member = True
-                member.oc_role = "soldier"
-                member.oc_boss = head
                 cosca.add(member)
         return cosca
 
@@ -619,15 +553,11 @@ class CrimeModel(mesa.Model):
     def assign_additional_members(self, additional_members, cosca, head, fill=False):
         for candidate in additional_members:
             if candidate != head:  # Ensure head is not included
-                candidate.oc_member = True
-                candidate.oc_role = "soldier"
-                candidate.oc_boss = head
                 cosca.add(candidate)
                 if fill:
                     for household_member in candidate.neighbors["household"]:
                         if household_member.age >= 18:
-                            household_member.oc_member = True
-                            household_member.oc_boss = head
+                            cosca.add(household_member)
         return cosca
 
     def make_people_die(self) -> None:
@@ -638,6 +568,14 @@ class CrimeModel(mesa.Model):
                 dead_agents.append(agent)
                 self.number_deceased += 1
         for agent in dead_agents:
+            if agent.oc_role == "boss":
+                if len(agent.oc_subordinates) > 0:
+                    oldest = max(agent.oc_subordinates, key=lambda person: person.age)
+                    oldest.oc_role = "boss"
+                    oldest.oc_subordinates = agent.oc_subordinates
+                    oldest.oc_subordinates.remove(oldest)
+                    for sub in oldest.oc_subordinates:
+                        sub.oc_boss = oldest
             agent.die()
             del agent
 
@@ -820,25 +758,32 @@ class CrimeModel(mesa.Model):
                 value[1] * len(people_in_cell) / self.ticks_per_year * self.crime_multiplier
             for _target in np.arange(np.round(target_n_of_crimes)):
                 self.number_crimes += 1
-                agent = weighted_one_of(people_in_cell,
+                starter = weighted_one_of(people_in_cell,
                                               lambda x: x.criminal_tendency,
                                               self.random)
                 number_of_accomplices = self.number_of_accomplices()
-                accomplices = agent.find_accomplices(number_of_accomplices)
+                accomplices = starter.find_accomplices(number_of_accomplices)
                 # this takes care of facilitators as well.
                 co_offender_groups.append(accomplices)
-                if agent.oc_member:
-                    co_offender_started_by_oc.append(accomplices)
+                if starter.oc_member:
+                    co_offender_started_by_oc.append((accomplices, starter))
                 # check for big crimes started from a normal guy
                 if len(accomplices) > self.this_is_a_big_crime \
-                        and agent.criminal_tendency < self.good_guy_threshold:
+                        and starter.criminal_tendency < self.good_guy_threshold:
                     self.big_crime_from_small_fish += 1
         for co_offender_group in co_offender_groups:
-            commit_crime(co_offender_group)
-        for co_offenders_by_OC in co_offender_started_by_oc:
+            commit_crime(co_offender_group) # sta in extras
+        for co_offenders_by_OC, starter in co_offender_started_by_oc:
             for agent in [agent for agent in co_offenders_by_OC if not agent.oc_member]:
                 agent.new_recruit = self.tick
                 agent.oc_member = True
+                if starter.oc_role == "boss":
+                    agent.oc_boss = starter
+                    starter.oc_subordinates.add(agent)
+                else:
+                    agent.oc_boss = starter.oc_boss
+                    starter.oc_boss.oc_subordinates.add(agent)
+                agent.oc_role = "soldier"
                 if agent.father:
                     if agent.father.oc_member:
                         self.number_offspring_recruited_this_tick += 1
@@ -854,7 +799,7 @@ class CrimeModel(mesa.Model):
                 else 0)
             for agent in weighted_n_of(target_n_of_arrest, criminals,
                                              lambda x: x.arrest_weight, self.random):
-                agent.get_caught()
+                agent.get_caught() # TODO
 
     def number_of_accomplices(self) -> int:
         """

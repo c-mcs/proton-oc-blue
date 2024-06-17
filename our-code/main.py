@@ -196,7 +196,7 @@ if __name__ == "__main__":
     if local:
         current_directory = os.path.dirname(os.path.abspath(__file__))
     start_time = time.time()
-    m = CrimeModel(5000, current_directory = current_directory)
+    m = CrimeModel(800, current_directory = current_directory)
     print("--- %s seconds --- (To calculate)" % (time.time() - start_time))
     print_report(m, current_directory, "1", True)
     j = 0
