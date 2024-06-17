@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import mesa
 import networkx as nx
@@ -11,8 +10,8 @@ class CrimeModel(mesa.Model):
     def __init__(self, N, current_directory, model_params = {"no-params":"empty"}, agent_params = {"no-params":"empty"}):
         super().__init__()
         self.current_directory = current_directory
-        self.number_weddings = 0
-        self.number_deceased = 0
+        self.number_weddings = 0 #
+        self.number_deceased = 0 #
         self.families = list()
         self.mafia_heads = set()
         self.tick = 0
@@ -52,8 +51,20 @@ class CrimeModel(mesa.Model):
 
         self.datacollector = mesa.datacollection.DataCollector(
             model_reporters={
-                "Steps": lambda m: m.schedule.steps,
-            }
+                "steps": lambda m: m.schedule.steps,
+                "number_weddings": lambda m: m.number_weddings,
+                "number_deceased": lambda m: m.number_deceased,
+                "tick": lambda m: m.tick,
+                "big_crime_from_small_fish": lambda m: m.big_crime_from_small_fish,
+                "number_offspring_recruited_this_tick": lambda m: m.number_offspring_recruited_this_tick,
+                "number_law_interventions_this_tick": lambda m: m.number_law_interventions_this_tick,
+                "people_jailed": lambda m: m.people_jailed,
+                "number_crimes": lambda m: m.number_crimes,
+                "number_born": lambda m: m.number_born,
+                "crime_size_fails": lambda m: m.crime_size_fails,
+                "oc_members": lambda m: len([p.oc_member for p in m.schedule.agents if p.oc_member == True]),
+                "oc_bosses": lambda m: len([p.oc_role for p in m.schedule.agents if p.oc_role == "boss"])
+            }, #agent_reporters={num_crimes_committed": "num_crimes_committed"}"""
         )
         self.setup()
 
@@ -76,6 +87,7 @@ class CrimeModel(mesa.Model):
         self.calculate_crime_multiplier() 
 
     def step(self):
+        self.datacollector.collect(self)
         self.tick += 1
         self.number_law_interventions_this_tick = 0 # TODO
 

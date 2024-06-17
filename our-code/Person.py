@@ -18,6 +18,7 @@ class Person(mesa.Agent):
         self.neighbors = self.networks_init()
         self.num_crimes_committed = 0
         self.num_crimes_committed_this_tick = 0
+        self.age = None
         self.new_recruit = -2
         self.immigrant = False
         self.number_of_children = 0
