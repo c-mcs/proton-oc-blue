@@ -235,9 +235,6 @@ class CrimeModel(mesa.Model):
             for friend in agent.neighbors['friendship']:
                 self.friends_graph.add_edge(agent.unique_id, friend.unique_id)
 
-        # Debug: Print the number of edges to verify links
-        print(f"Number of friendships: {self.friends_graph.number_of_edges()}")
-
 
 
     def generate_households(self) -> None:
@@ -477,8 +474,6 @@ class CrimeModel(mesa.Model):
         scaled_num_oc_persons = int(np.ceil(
             self.num_oc_persons * self.initial_agents / 10000))
         members_per_family = max(1, int(scaled_num_oc_persons / scaled_num_oc_families))  # Ensure at least 1 member per family
-        print(f"Members per family: {members_per_family}")
-        print(f"Families: {scaled_num_oc_families}")
         oc_family_heads = weighted_n_of(scaled_num_oc_families, [agent for agent in self.schedule.agents if agent.gender_is_male],
                                         lambda x: x.criminal_tendency, self.random)
         graphs = []
@@ -730,9 +725,6 @@ class CrimeModel(mesa.Model):
             self.friends_graph.add_node(agent.unique_id)
             for friend in agent.neighbors['friendship']:
                 self.friends_graph.add_edge(agent.unique_id, friend.unique_id)
-
-        # Debug: Print the number of edges to verify links
-        print(f"Number of friendships (updated): {self.friends_graph.number_of_edges()}")
 
     def add_immigrants(self):
         n_immigrants = int(self.initial_agents * 0.01)
