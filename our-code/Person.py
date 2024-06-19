@@ -18,14 +18,15 @@ class Person(mesa.Agent):
         self.neighbors = self.networks_init()
         self.num_crimes_committed = 0
         self.num_crimes_committed_this_tick = 0
-        self.age = None
         self.new_recruit = -2
         self.immigrant = False
         self.number_of_children = 0
+        
         self.oc_member = False
         self.oc_role = None
         self.oc_boss = None
         self.oc_subordinates = None
+        
         self.family_role = None
         self.arrest_weight = 0
         self.num_co_offenses = dict()  # criminal-links
@@ -33,6 +34,8 @@ class Person(mesa.Agent):
         self.job_level = 0
         self.wealth_level = 0
         self.criminal_tendency = 0
+        self.age = None
+        
         self.mother = None
         self.father = None
 
@@ -50,9 +53,8 @@ class Person(mesa.Agent):
         self.age = row[0]
         self.gender_is_male = bool(row[1])  # ...and gender according to values in that row.
         self.retired = self.age >= self.model.retirement_age  # persons older than retirement_age are retired
-        # education level is chosen, job and wealth follow in a conditioned sequence
-        
-        # Set education level based on age
+               
+        # Set education level based on age SEMPLIFICATO TODO CONTROLLARE POI LA PROGRESSIONE
         if self.age < 13:
             self.education_level = 1.0
         elif self.age < 18:

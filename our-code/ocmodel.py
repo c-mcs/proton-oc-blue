@@ -51,7 +51,6 @@ class CrimeModel(mesa.Model):
 
         self.datacollector = mesa.datacollection.DataCollector(
             model_reporters={
-                "steps": lambda m: m.schedule.steps,
                 "number_weddings": lambda m: m.number_weddings,
                 "number_deceased": lambda m: m.number_deceased,
                 "tick": lambda m: m.tick,
@@ -62,9 +61,28 @@ class CrimeModel(mesa.Model):
                 "number_crimes": lambda m: m.number_crimes,
                 "number_born": lambda m: m.number_born,
                 "crime_size_fails": lambda m: m.crime_size_fails,
-                "oc_members": lambda m: len([p.oc_member for p in m.schedule.agents if p.oc_member == True]),
-                "oc_bosses": lambda m: len([p.oc_role for p in m.schedule.agents if p.oc_role == "boss"])
-            }, #agent_reporters={num_crimes_committed": "num_crimes_committed"}"""
+                "TotalCrimes": lambda m: m.number_crimes,
+                "TotalAffiliates": lambda m: sum([1 for agent in m.schedule.agents if agent.oc_member]),
+            },
+            agent_reporters={
+                "Age": "age",
+                "Gender": "gender_is_male",
+                "WealthLevel": "wealth_level",
+                "EducationLevel": "education_level",
+                "CriminalTendency": "criminal_tendency",
+                "NumCrimesCommitted": "num_crimes_committed",
+                "OCMember": "oc_member",
+                "OCRole": "oc_role",
+                "OCBoss": "oc_boss",
+                "OCSubordinates": lambda a: [sub.unique_id for sub in a.oc_subordinates] if a.oc_subordinates else [],
+                "FamilyRole": "family_role",
+                "ArrestWeight": "arrest_weight",
+                "NumCoOffenses": lambda a: sum(a.num_co_offenses.values()),
+                "CoOffFlag": lambda a: a.co_off_flag,
+                "JobLevel": "job_level",
+                "Immigrant": "immigrant",
+                "NewRecruit": "new_recruit"
+            }
         )
         self.setup()
 
@@ -83,8 +101,8 @@ class CrimeModel(mesa.Model):
             if not agent.gender_is_male and agent.get_neighbor_list("offspring"):
                 agent.number_of_children = len(agent.get_neighbor_list("offspring"))
     
-        self.calculate_criminal_tendency()
-        self.calculate_crime_multiplier() 
+        self.calculate_criminal_tendency() # TODO perché due volte?
+        self.calculate_crime_multiplier()
 
     def step(self):
         self.datacollector.collect(self)
@@ -136,6 +154,7 @@ class CrimeModel(mesa.Model):
             self.punishment_length_data[["months", "F"]], split_row=False)
         self.num_co_offenders_dist = df_to_lists(
             read_csv_data("num_co_offenders_dist", self.current_directory), split_row=False)
+        
     def cleanup_unfit_individuals(self):
         for a in self.schedule.agents:
             if a.family_role == None:
@@ -175,6 +194,7 @@ class CrimeModel(mesa.Model):
                 new_agent.immigrant = True
 
     def calculate_similarity(self, agent, potential_friend):
+
         age_diff = abs(agent.age - potential_friend.age)
         gender_diff = int(agent.gender_is_male != potential_friend.gender_is_male)
         education_diff = abs(agent.education_level - potential_friend.education_level)
@@ -387,7 +407,7 @@ class CrimeModel(mesa.Model):
             # remove couples from candidates and their neighborhoods (siblings)
             if len(candidates) >= 50:
                 candidates = self.random.choice(candidates, 50, replace=False).tolist()
-            while len(candidates) > 0 and list_contains_problems(agent, candidates):
+            while len(candidates) > 0 and list_contains_problems(agent, candidates): # type: ignore
                 # trouble should exist, or check-all-siblings would fail
                 potential_trouble = [x for x in candidates if agent.get_neighbor_list("partner")]
                 trouble = self.random.choice(potential_trouble)
@@ -473,6 +493,16 @@ class CrimeModel(mesa.Model):
         #if self.intervention_is_on() and self.facilitator_repression:
             #self.calc_correction_for_non_facilitators() # Possibilità di inserire qui una policy
     
+    def normal_weight(self, age, mean=45, std_dev=10):
+        """Calcula la probabilità di una certa età rispetto alla distribuzione normale."""
+        return np.exp(-0.5 * ((age - mean) / std_dev) ** 2)
+
+    # Nuova funzione di pesatura
+    def weighted_age_criminal_tendency(self, agent):
+        age_weight = self.normal_weight(agent.age)
+        criminal_tendency_weight = agent.criminal_tendency**2
+        return age_weight + criminal_tendency_weight
+
     def setup_oc_groups2(self) -> None:
         """
         This procedure creates "criminal" type links within the families, based on the criminal
@@ -486,8 +516,8 @@ class CrimeModel(mesa.Model):
         scaled_num_oc_persons = int(np.ceil(
             self.num_oc_persons * self.initial_agents / 10000))
         members_per_family = max(1, int(scaled_num_oc_persons / scaled_num_oc_families))  # Ensure at least 1 member per family
-        oc_family_heads = weighted_n_of(scaled_num_oc_families, [agent for agent in self.schedule.agents if agent.gender_is_male],
-                                        lambda x: x.criminal_tendency, self.random)
+        oc_family_heads = weighted_n_of(scaled_num_oc_families, [agent for agent in self.schedule.agents if agent.gender_is_male and agent.age >= 18],
+                                        self.weighted_age_criminal_tendency, self.random)
         graphs = []
         for head in oc_family_heads:
             head.oc_member = True
@@ -574,6 +604,7 @@ class CrimeModel(mesa.Model):
             if self.random.random() < agent.p_mortality() or agent.age > 119:
                 dead_agents.append(agent)
                 self.number_deceased += 1
+
         for agent in dead_agents:
             if agent.oc_role == "boss":
                 if len(agent.oc_subordinates) > 0:
@@ -696,7 +727,7 @@ class CrimeModel(mesa.Model):
                 current_friends = list(agent.neighbors['friendship'])
                 current_friends_n = len(current_friends)
                 if not current_friends:
-                    current_friends_n = random.randint(1,4)  # Skip the agent if it has no friends
+                    current_friends_n = random.randint(1,4)  # Skip the agent if it has no friends ?? TODO
 
                 num_friends_to_renovate = max(1, int(current_friends_n * update_share))
                 

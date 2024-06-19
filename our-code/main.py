@@ -197,8 +197,9 @@ if __name__ == "__main__":
         current_directory = os.path.dirname(os.path.abspath(__file__))
     start_time = time.time()
     m = CrimeModel(5000, current_directory = current_directory)
-    print("--- %s seconds --- (To calculate)" % (time.time() - start_time))
-    #print_report(m, current_directory, "1", save_to_file = True)
+    print("--- %s seconds --- (To setup model)" % (time.time() - start_time))
+    print_report(m, current_directory, "1", save_to_file = True)
+    print(" ---- first report done! ---- ")
     j = 0
     for i in range(360):
         m.step()
@@ -206,6 +207,7 @@ if __name__ == "__main__":
             j+=1
             #print_report(m, current_directory, str(j),save_to_file = True)
     model_data = m.datacollector.get_model_vars_dataframe()
+    
     print(model_data)
     #show_graphs(m)
     
